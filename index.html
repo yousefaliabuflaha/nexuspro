@@ -4009,20 +4009,19 @@ Based on this CAN Bus data, provide a JSON response with:
 
 Return ONLY valid JSON, no explanation, no markdown.`;
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
+   const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
         'Content-Type': 'application/json',
-        'x-api-key': S.apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 3000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+        'Authorization': `Bearer ${S.apiKey}`
+    },
+    body: JSON.stringify({
+        model: 'llama3-8b-8192', // هذا الموديل سريع وممتاز لتشخيص الأعطال
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.5,
+        max_tokens: 3000
+    })
+});
 
     const data = await res.json();
     const raw = data.content?.[0]?.text || '';
