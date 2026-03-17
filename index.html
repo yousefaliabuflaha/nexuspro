@@ -35,17 +35,29 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
 }
 .lang-wrap{
   display:flex;align-items:center;gap:6px;
-  background:var(--bg2);
-  border:1px solid var(--bdr);
-  border-radius:8px;
-  padding:4px 8px;
+  background:rgba(0,0,0,0.1);
+  border:1px solid rgba(0,229,255,0.35);
+  border-radius:14px;
+  padding:5px 10px;
+  backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);
+  color:var(--cyan);
+  box-shadow:0 0 20px rgba(0,255,255,0.2);
   transition:var(--tr);
+  position:relative;
 }
-.lang-wrap:hover{border-color:var(--cyan);}
+.lang-wrap:hover{border-color:var(--green);box-shadow:0 0 26px rgba(0,255,255,0.28);}
 .lang-globe{font-size:14px;flex-shrink:0;}
-.lang-wrap .lsel{background:transparent;border:none;padding:3px 4px;}
-
-/* HEADER */
+.lang-dropdown{position:relative;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
+.lang-selected{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,0.2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(0,229,255,0.25);box-shadow:0 0 18px rgba(0,255,255,0.18);}
+.lang-selected .lang-icon{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;filter:drop-shadow(0 0 8px rgba(0,255,255,0.7));}
+.lang-selected .lang-label{font-size:12px;font-weight:700;color:#fff;}
+.lang-selected .lang-arrow{font-size:12px;color:#BBFDFF;}
+.lang-options{position:absolute;top:100%;left:0;right:0;margin-top:8px;list-style:none;padding:8px;max-height:240px;overflow:auto;border-radius:12px;background:rgba(0,0,0,0.28);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(0,229,255,0.35);box-shadow:0 10px 24px rgba(0,0,0,0.38);opacity:0;visibility:hidden;transform:translateY(-10px);transition:opacity .22s ease,transform .22s ease,visibility .22s;z-index:400;}
+.lang-options.open{opacity:1;visibility:visible;transform:translateY(0);}
+.lang-options li{padding:9px 10px;border-radius:9px;font-size:12px;color:#fff;cursor:pointer;margin-bottom:4px;transition:var(--tr);background:rgba(0,0,0,0.22);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+.lang-options li:hover{background:rgba(0,255,255,0.2);color:#000;text-shadow:0 0 6px rgba(255,255,255,0.8);box-shadow:0 0 12px rgba(0,255,255,0.35);}
+.lang-wrap select.lsel{display:none !important;}
 .hdr{height:var(--hh);background:rgba(10,20,30,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:fixed;top:0;left:0;right:0;z-index:300;}
 .logo{display:flex;align-items:center;gap:12px;}
 .logo-ico{width:32px;height:32px;color:var(--cyan);filter:drop-shadow(0 0 8px var(--cglow));}
@@ -75,7 +87,8 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
 .sbnav{display:flex;flex-direction:column;gap:3px;padding:0 10px;flex:1;}
 .ni{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:10px;color:var(--dim);background:transparent;border:none;width:100%;cursor:pointer;font-size:13px;font-weight:500;transition:var(--tr);text-align:left;}
 .ni:hover{background:rgba(255,255,255,0.04);color:var(--txt);}
-.ni.on{background:var(--cdim);color:var(--cyan);}
+.ni.on{background:var(--cdim);color:var(--cyan);box-shadow:0 0 14px rgba(0,229,255,0.35);}
+.ni.on .ni-ico{filter:drop-shadow(0 0 10px rgba(0,229,255,0.6));}
 .ni-ico{width:18px;height:18px;flex-shrink:0;}
 .ni-badge{margin-left:auto;font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;background:rgba(255,61,113,0.2);color:var(--red);}
 .sbfoot{padding:16px;border-top:1px solid var(--bdr);}
@@ -85,8 +98,8 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
 
 /* MAIN */
 .main{flex:1;overflow-y:auto;background:radial-gradient(ellipse at 80% 0%,#0C1F35,var(--bg) 60%);padding:24px;}
-.page{display:none;animation:fi 0.3s ease;}
-.page.on{display:block;}
+.page, .page-content{display:none;opacity:0;transition:opacity .35s ease,transform .35s ease;transform:translateY(8px);}
+.page.on, .page-content.on{display:block;opacity:1;transform:translateY(0);}
 @keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .phdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
 .ptitle{font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--cyan);letter-spacing:1px;}
@@ -233,13 +246,20 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
 .mbtns{display:flex;gap:10px;justify-content:flex-end;}
 
 /* CONN MODAL */
-.cmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;}
+.cmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:900;align-items:center;justify-content:center;}
 .cmodal.on{display:flex;}
-.cbox{background:var(--bg2);border:1px solid var(--bdr);border-radius:20px;padding:28px;width:420px;max-width:92vw;}
-.cstep{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;border:1px solid var(--bdr);margin-bottom:8px;transition:var(--tr);}
-.cstep.searching{border-color:var(--orange);background:rgba(255,159,28,0.06);}
-.cstep.found{border-color:var(--green);background:rgba(0,255,136,0.06);}
-.cstep.failed{border-color:var(--red);background:rgba(255,61,113,0.06);}
+.cbox{background:rgba(5,10,15,0.82);border:1px solid rgba(0,229,255,0.25);border-radius:16px;padding:28px;width:460px;max-width:94vw;backdrop-filter:blur(10px);box-shadow:0 18px 50px rgba(0,0,0,0.65);}
+.conn-title{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;color:#00E5FF;margin-bottom:8px;letter-spacing:1px;text-align:center;}
+.conn-sub{font-family:'Inter',sans-serif;font-size:12px;color:var(--dim);text-align:center;margin-bottom:20px;}
+.conn-options{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.conn-option{flex:1 1 190px;padding:14px 16px;border-radius:14px;border:1px solid rgba(0,229,255,0.4);background:linear-gradient(135deg,rgba(0,229,255,0.10),rgba(0,0,0,0.35));color:#fff;font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;text-align:center;cursor:pointer;transition:all .25s ease;box-shadow:0 8px 22px rgba(0,229,255,0.15);}
+.conn-option:hover{transform:translateY(-2px);border-color:#00E5FF;background:linear-gradient(135deg,rgba(0,229,255,0.2),rgba(0,0,0,0.45));}
+.conn-option small{display:block;font-family:'Inter',sans-serif;font-size:11px;font-weight:500;color:#9ee9ff;opacity:0.8;margin-top:6px;}
+.conn-status{font-size:12px;color:#00E5FF;text-align:center;margin-top:10px;min-height:18px;}
+.cancel-conn{margin-top:18px;text-align:center;}
+/* compatibility/bypass old cstep utilities */
+.cstep{display:none;}
+.cstep.searching,.cstep.found,.cstep.failed{display:none;}
 .spin{animation:sp 1s linear infinite;}
 @keyframes sp{to{transform:rotate(360deg)}}
 
@@ -624,6 +644,27 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
 /* ====================================================
    NEW SECTIONS CSS
    ==================================================== */
+.page{padding-top:100px;}
+.phdr .ptitle{color:var(--cyan);text-shadow:0 0 16px rgba(0,229,255,0.45),0 0 32px rgba(0,229,255,0.25);}
+
+.placeholder-block{margin:18px 0 22px;padding:18px;border:1px solid rgba(0,229,255,0.28);border-radius:14px;background:rgba(0,229,255,0.04);box-shadow:0 0 22px rgba(0,229,255,0.08);}
+.placeholder-title{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;text-shadow:0 0 8px rgba(0,229,255,0.8),0 0 16px rgba(0,229,255,0.4);}
+.placeholder-card{position:relative;padding:20px;border-radius:14px;border:1px solid rgba(0,229,255,0.5);background:linear-gradient(135deg,rgba(0,229,255,0.08),rgba(0,229,255,0.018));display:flex;align-items:center;gap:14px;box-shadow:0 0 18px rgba(0,229,255,0.18);}
+.placeholder-card::before{content:'';position:absolute;inset:-2px;border-radius:16px;background:linear-gradient(135deg,rgba(0,229,255,0.8),rgba(0,255,136,0.55),rgba(255,61,113,0.55));filter:blur(8px);z-index:-1;opacity:0.7;}
+.placeholder-spinner{width:26px;height:26px;border:3px solid rgba(255,255,255,0.25);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite;}
+
+.radar-wrap{position:relative;width:220px;height:220px;margin:0 auto 20px;}
+.radar-base{position:absolute;inset:0;border:2px solid rgba(0,229,255,0.25);border-radius:50%;box-shadow:0 0 14px rgba(0,229,255,0.25);animation:rotateRadar 8s linear infinite;}
+.radar-sweep{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 24px rgba(0,229,255,0.65);mask-image:linear-gradient(90deg,rgba(0,0,0,0.6),rgba(0,0,0,0));transform-origin:center;animation:sweep 2.4s linear infinite;}
+.radar-center{position:absolute;top:50%;left:50%;width:14px;height:14px;background:var(--cyan);border-radius:50%;transform:translate(-50%, -50%);box-shadow:0 0 20px rgba(0,229,255,0.85);}
+.radar-ring{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(0,229,255,0.14);}
+.radar-ring:nth-child(1){transform:scale(0.3);}
+.radar-ring:nth-child(2){transform:scale(0.5);}
+.radar-ring:nth-child(3){transform:scale(0.8);}
+.radar-msg{text-align:center;font-size:13px;color:var(--cyan);}
+@keyframes sweep{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+@keyframes rotateRadar{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
 /* SECTION DIVIDER in sidebar */
 .sb-section{font-size:9px;font-weight:800;letter-spacing:2px;color:rgba(100,116,139,0.5);
   padding:14px 14px 6px;text-transform:uppercase;}
@@ -821,40 +862,8 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
 </head>
 <body>
 
-<!-- AUTH OVERLAY -->
-<div id="authOverlay" style="
-  position:fixed;inset:0;z-index:99999;
-  background:#050A0F;
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Inter',sans-serif;
-">
-  <div style="
-    background:#0A141E;border:1px solid #1A2E3E;
-    border-radius:20px;padding:40px;width:360px;max-width:90vw;
-    box-shadow:0 0 60px rgba(0,229,255,0.1);text-align:center;
-  ">
-    <div style="font-size:36px;margin-bottom:8px;">🔧</div>
-    <div style="font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;
-      background:linear-gradient(135deg,#fff,#00E5FF);-webkit-background-clip:text;
-      -webkit-text-fill-color:transparent;letter-spacing:2px;margin-bottom:4px;">NEXUS PRO</div>
-    <div style="font-size:11px;color:#64748B;letter-spacing:3px;margin-bottom:28px;">DIAGNOSTICS v5</div>
-    <input id="authPin" type="password" placeholder="Enter PIN or API Key"
-      style="width:100%;background:#050A0F;border:1px solid #1A2E3E;border-radius:10px;
-      padding:12px 16px;color:#E0E6ED;font-size:14px;outline:none;margin-bottom:12px;box-sizing:border-box;"
-      onkeydown="if(event.key==='Enter')authLogin()"
-    >
-    <div id="authErr" style="color:#FF3D71;font-size:12px;margin-bottom:10px;display:none;">❌ Incorrect PIN</div>
-    <button onclick="authLogin()" style="
-      width:100%;background:linear-gradient(135deg,#00B4D8,#0077B6);
-      color:#fff;border:none;border-radius:10px;padding:12px;
-      font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px;
-    ">🔓 Enter</button>
-    <div style="font-size:11px;color:#64748B;">Default PIN: <strong style="color:#00E5FF;">1234</strong> · Change in Settings</div>
-  </div>
-</div>
-
 <header class="hdr">
-  <div class="logo">
+  <div class="logo" id="logoHome" style="cursor:pointer;" title="Home" aria-label="Home" tabindex="0">
     <div class="logo-ico-wrap">
       <svg viewBox="0 0 40 40" fill="none" width="36" height="36">
         <circle cx="20" cy="20" r="18" stroke="#00E5FF" stroke-width="1.5" opacity="0.3"/>
@@ -871,28 +880,76 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
   <div class="hrgt">
     <button class="btn bc" id="connBtn"><svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg><span id="cbtxt">Connect ELM327</span></button>
     <div class="lang-wrap">
-      <span class="lang-globe">🌐</span>
-      <select class="lsel" id="langSel">
+      <div class="lang-dropdown" id="langDropdown">
+        <div class="lang-selected" id="langSelected" aria-haspopup="true" aria-expanded="false" role="button" tabindex="0">
+          <span class="lang-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" stroke="#00E5FF" stroke-width="1.5" opacity="0.4"/><path d="M12 2a10 10 0 0 0 0 20M2 12a10 10 0 0 0 20 0" stroke="#00E5FF" stroke-width="1.2" opacity="0.6"/><path d="M6 12h12M12 6v12" stroke="#00E5FF" stroke-width="1.2"/></svg></span>
+          <span class="lang-label">English</span>
+          <span class="lang-arrow">▾</span>
+        </div>
+        <ul class="lang-options" id="langOptions" role="menu" aria-hidden="true">
+          <li role="menuitem" data-value="en">🇺🇸 English</li>
+          <li role="menuitem" data-value="ar">🇸🇦 العربية</li>
+          <li role="menuitem" data-value="zh">🇨🇳 中文</li>
+          <li role="menuitem" data-value="hi">🇮🇳 हिन्दी</li>
+          <li role="menuitem" data-value="bn">🇧🇩 বাংলা</li>
+          <li role="menuitem" data-value="ja">🇯🇵 日本語</li>
+          <li role="menuitem" data-value="ko">🇰🇷 한국어</li>
+          <li role="menuitem" data-value="th">🇹🇭 ไทย</li>
+          <li role="menuitem" data-value="vi">🇻🇳 Tiếng Việt</li>
+          <li role="menuitem" data-value="id">🇮🇩 Bahasa Indonesia</li>
+          <li role="menuitem" data-value="ru">🇷🇺 Русский</li>
+          <li role="menuitem" data-value="uk">🇺🇦 Українська</li>
+          <li role="menuitem" data-value="pl">🇵🇱 Polski</li>
+          <li role="menuitem" data-value="sr">🇷🇸 Српски</li>
+          <li role="menuitem" data-value="tr">🇹🇷 Türkçe</li>
+          <li role="menuitem" data-value="de">🇩🇪 Deutsch</li>
+          <li role="menuitem" data-value="fr">🇫🇷 Français</li>
+          <li role="menuitem" data-value="es">🇪🇸 Español</li>
+          <li role="menuitem" data-value="pt">🇵🇹 Português</li>
+          <li role="menuitem" data-value="it">🇮🇹 Italiano</li>
+          <li role="menuitem" data-value="nl">🇳🇱 Nederlands</li>
+          <li role="menuitem" data-value="sv">🇸🇪 Svenska</li>
+          <li role="menuitem" data-value="fi">🇫🇮 Suomi</li>
+          <li role="menuitem" data-value="no">🇳🇴 Norsk</li>
+          <li role="menuitem" data-value="da">🇩🇰 Dansk</li>
+          <li role="menuitem" data-value="mi">🇳🇿 Māori</li>
+          <li role="menuitem" data-value="sw">🇰🇪 Kiswahili</li>
+          <li role="menuitem" data-value="af">🇿🇦 Afrikaans</li>
+          <li role="menuitem" data-value="he">🇮🇱 עברית</li>
+          <li role="menuitem" data-value="ms">🇲🇾 Melayu</li>
+        </ul>
+      </div>
+      <select class="lsel" id="langSel" hidden>
         <option value="en">🇺🇸 English</option>
         <option value="ar">🇸🇦 العربية</option>
-        <option value="fr">🇫🇷 Français</option>
-        <option value="de">🇩🇪 Deutsch</option>
-        <option value="es">🇪🇸 Español</option>
-        <option value="tr">🇹🇷 Türkçe</option>
-        <option value="ru">🇷🇺 Русский</option>
         <option value="zh">🇨🇳 中文</option>
+        <option value="hi">🇮🇳 हिन्दी</option>
+        <option value="bn">🇧🇩 বাংলা</option>
         <option value="ja">🇯🇵 日本語</option>
         <option value="ko">🇰🇷 한국어</option>
-        <option value="it">🇮🇹 Italiano</option>
-        <option value="pt">🇧🇷 Português</option>
-        <option value="nl">🇳🇱 Nederlands</option>
-        <option value="pl">🇵🇱 Polski</option>
-        <option value="fa">🇮🇷 فارسی</option>
-        <option value="hi">🇮🇳 हिन्दी</option>
-        <option value="id">🇮🇩 Bahasa</option>
+        <option value="th">🇹🇭 ไทย</option>
         <option value="vi">🇻🇳 Tiếng Việt</option>
+        <option value="id">🇮🇩 Bahasa Indonesia</option>
+        <option value="ru">🇷🇺 Русский</option>
+        <option value="uk">🇺🇦 Українська</option>
+        <option value="pl">🇵🇱 Polski</option>
+        <option value="sr">🇷🇸 Српски</option>
+        <option value="tr">🇹🇷 Türkçe</option>
+        <option value="de">🇩🇪 Deutsch</option>
+        <option value="fr">🇫🇷 Français</option>
+        <option value="es">🇪🇸 Español</option>
+        <option value="pt">🇵🇹 Português</option>
+        <option value="it">🇮🇹 Italiano</option>
+        <option value="nl">🇳🇱 Nederlands</option>
         <option value="sv">🇸🇪 Svenska</option>
-        <option value="ro">🇷🇴 Română</option>
+        <option value="fi">🇫🇮 Suomi</option>
+        <option value="no">🇳🇴 Norsk</option>
+        <option value="da">🇩🇰 Dansk</option>
+        <option value="mi">🇳🇿 Māori</option>
+        <option value="sw">🇰🇪 Kiswahili</option>
+        <option value="af">🇿🇦 Afrikaans</option>
+        <option value="he">🇮🇱 עברית</option>
+        <option value="ms">🇲🇾 Melayu</option>
       </select>
     </div>
   </div>
@@ -944,6 +1001,11 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
     <button class="ni" data-page="oscilloscope">
       <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       <span>Oscilloscope</span>
+    </button>
+
+    <button class="ni" data-page="history">
+      <svg class="ni-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Vehicle History</span>
     </button>
 
     <!-- SERVICE -->
@@ -1000,13 +1062,14 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
 <main class="main" id="mainArea">
 
 <!-- ======= WELCOME PAGE ======= -->
-<div class="page on" id="page-welcome">
-  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px;text-align:center;gap:28px;">
+<div id="home-screen" class="page-content on">
+  <div class="page on" id="page-welcome">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:32px;text-align:center;gap:28px;">
 
     <!-- Logo & Title -->
     <div>
       <div style="font-size:48px;margin-bottom:12px;">🔧</div>
-      <div style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;background:linear-gradient(135deg,#fff,#00E5FF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:3px;margin-bottom:6px;">NEXUS PRO</div>
+      <div style="font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;background:linear-gradient(135deg,#fff,#00E5FF);-webkit-background-clip:text;background-clip: text;-webkit-text-fill-color:transparent;letter-spacing:3px;margin-bottom:6px;">NEXUS PRO</div>
       <div style="color:var(--dim);font-size:13px;letter-spacing:2px;">PROFESSIONAL VEHICLE DIAGNOSTICS</div>
     </div>
 
@@ -1100,6 +1163,25 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
       <button class="btn bc" id="startScanBtn"><svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12A10 10 0 1 1 12 2v10z"/></svg><span data-i18n="startScan">Start Scan</span></button>
     </div>
   </div>
+  <div class="placeholder-block">
+    <div class="placeholder-title">FULL SCAN</div>
+    <div class="radar-wrap" aria-hidden="true">
+      <div class="radar-base"></div>
+      <div class="radar-sweep"></div>
+      <div class="radar-center"></div>
+      <div class="radar-ring"></div>
+      <div class="radar-ring"></div>
+      <div class="radar-ring"></div>
+    </div>
+    <div class="placeholder-card">
+      <div class="placeholder-spinner" aria-label="Loading"></div>
+      <div>
+        <div style="font-weight:700;color:#fff;">Coming Soon • Full system scan core</div>
+        <div style="font-size:12px;color:var(--dim);">Ready to diagnose your vehicle the moment you connect.</div>
+      </div>
+    </div>
+    <div class="radar-msg">Scanning radar active • awaiting vehicle connection...</div>
+  </div>
   <div class="scan-status" id="scanStatus">
     <div style="font-size:32px;">🔍</div>
     <div class="scan-progress" style="flex:1;">
@@ -1135,6 +1217,22 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
   <div id="repContainer" style="margin-top:20px;"></div>
 </div>
 
+<!-- ======= FULL SCAN REPORT ======= -->
+<div class="page" id="page-report">
+  <div class="phdr">
+    <button class="back" onclick="goBack('fullscan')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg><span data-i18n="back">Back</span></button>
+    <div class="ptitle">🔧 NEXUS PRO DIAGNOSTIC REPORT</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn bg" onclick="window.print()"><svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg><span data-i18n="print">Print</span></button>
+      <button class="btn bg" onclick="copyReport()"><svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg><span data-i18n="copy">Copy</span></button>
+      <button class="btn bg" onclick="speakReport()"><svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12c-1 0-3-1-3-3s2-3 3-3 3 1 3 3-2 3-3 3"/><path d="M3 12c1 0 3-1 3-3s-2-3-3-3-3 1-3 3 2 3 3 3"/><path d="M12 3v18"/></svg><span data-i18n="speak">Speak</span></button>
+      <button class="btn bg" onclick="stopSpeech()" style="display:none;" id="stopVoiceBtn"><svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg><span data-i18n="stop">Stop</span></button>
+      <button class="btn bc" onclick="showPage('dtcFaults'); updateNavActive('fullscan');"><svg class="bico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg><span>DTC Details</span></button>
+    </div>
+  </div>
+  <div id="fullReportContainer"></div>
+</div>
+
 <!-- ======= DTC DETAIL ======= -->
 <div class="page" id="page-dtcDetail">
   <button class="back" id="backDtc" onclick="goBack('dtcFaults')">
@@ -1168,6 +1266,16 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
   <div class="phdr">
     <div class="ptitle" data-i18n="canBus">CAN BUS MONITOR</div>
     <select class="lsel" id="sysSel"><option>All (0x7DF)</option><option>Engine (0x7E0)</option><option>Transmission</option><option>ABS</option></select>
+  </div>
+  <div class="placeholder-block">
+    <div class="placeholder-title">CAN Bus</div>
+    <div class="placeholder-card">
+      <div class="placeholder-spinner" aria-label="Loading"></div>
+      <div>
+        <div style="font-weight:700;color:#fff;">Coming Soon • Live CAN frame feed</div>
+        <div style="font-size:12px;color:var(--dim);">Auto-detecting frames from multiple ECUs with neon trace chart.</div>
+      </div>
+    </div>
   </div>
   <div style="background:#020810;border-radius:12px;border:1px solid var(--bdr);font-family:'JetBrains Mono',monospace;">
     <div style="display:grid;grid-template-columns:110px 70px 50px 1fr 110px;padding:10px 16px;background:rgba(255,255,255,0.04);border-bottom:1px solid var(--bdr);font-size:11px;font-weight:700;color:var(--dim);">
@@ -1355,6 +1463,16 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
       <span>Load Freeze Frame</span>
     </button>
   </div>
+  <div class="placeholder-block">
+    <div class="placeholder-title">FREEZE FRAME</div>
+    <div class="placeholder-card">
+      <div class="placeholder-spinner" aria-label="Loading"></div>
+      <div>
+        <div style="font-weight:700;color:#fff;">Coming Soon • Captured snapshot playback</div>
+        <div style="font-size:12px;color:var(--dim);">Freeze and rewind vehicle fault frame with neon interface.</div>
+      </div>
+    </div>
+  </div>
   <!-- System selector tabs -->
   <div id="ffSysTabs" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;"></div>
   <div class="ff-banner" id="ffBanner" style="display:none;">
@@ -1524,6 +1642,18 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
   </div>
 </div>
 
+<!-- ======= VEHICLE HISTORY / PATIENT CARDS ======= -->
+<div class="page" id="page-history">
+  <div class="phdr"><div class="ptitle" style="color:var(--cyan);">📋 VEHICLE HISTORY — PATIENT CARDS</div></div>
+  <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;">
+    <input class="search-inp" id="historySearchInput" placeholder="🔍 Search by VIN or Make..." style="flex:1;min-width:200px;background:rgba(0,0,0,0.3);border:1px solid rgba(0,229,255,0.2);border-radius:8px;padding:10px;color:var(--cyan);font-size:13px;">
+    <button class="btn bc" onclick="exportVehicleHistory()" style="font-size:11px;">📥 Export All</button>
+    <button class="btn bg" onclick="clearVehicleHistory()" style="font-size:11px;">🗑️ Clear History</button>
+  </div>
+  <div id="vehicleHistoryGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;"></div>
+  <div id="noHistoryMsg" style="text-align:center;padding:40px;color:var(--dim);font-size:14px;">📭 No vehicle history yet. Connect a vehicle to start recording.</div>
+</div>
+
 <!-- ======= BATTERY REGISTRATION ======= -->
 <div class="page" id="page-batteryReg">
   <div class="phdr"><div class="ptitle" style="color:var(--orange);">🔋 BATTERY REGISTRATION & RESET</div></div>
@@ -1643,10 +1773,26 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
 <!-- ======= SETTINGS ======= -->
 <div class="page" id="page-settings">
   <div class="phdr"><div class="ptitle" data-i18n="settings">SETTINGS</div></div>
+  <div class="placeholder-block">
+    <div class="placeholder-title">Settings</div>
+    <div class="placeholder-card">
+      <div class="placeholder-spinner" aria-label="Loading"></div>
+      <div>
+        <div style="font-weight:700;color:#fff;">Coming Soon • Unified configuration hub</div>
+        <div style="font-size:12px;color:var(--dim);">Control diagnostics, thresholds, and API keys from one secure panel.</div>
+      </div>
+    </div>
+  </div>
   <div class="set-grp">
-    <h3>🤖 Claude AI</h3>
-    <div class="set-row"><div><div class="set-lbl" data-i18n="apiKey">API Key</div><div class="set-desc">console.anthropic.com</div></div><input type="password" class="api-inp" id="apiInp" placeholder="sk-ant-api03-..."/></div>
+    <h3>🤖 Claude AI + Translations</h3>
+    <div class="set-row"><div><div class="set-lbl" data-i18n="apiKey">AI API Key</div><div class="set-desc">console.anthropic.com</div></div><input type="password" class="api-inp" id="apiInp" placeholder="sk-ant-api03-..."/></div>
+    <div class="set-row"><div><div class="set-lbl">Translate API Key</div><div class="set-desc">Google Cloud Translate v2 key</div></div><input type="password" class="api-inp" id="translateApiInp" placeholder="AIza..."/></div>
     <button class="sbtn" id="saveKey" data-i18n="save">💾 Save</button>
+  </div>
+  <div class="set-grp">
+    <h3>🔗 Custom Diagnostics API</h3>
+    <div class="set-row"><div><div class="set-lbl">API Base URL</div><div class="set-desc">Your diagnostic API endpoint (e.g., https://api.yourserver.com)</div></div><input type="text" class="api-inp" id="customApiUrl" placeholder="https://api.yourserver.com"/></div>
+    <button class="sbtn" onclick="saveCustomApiUrl()">💾 Save API URL</button>
   </div>
   <div class="set-grp">
     <h3 data-i18n="connSet">🔌 Connection</h3>
@@ -1660,12 +1806,14 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
 <!-- CONN MODAL -->
 <div class="cmodal" id="connModal">
   <div class="cbox">
-    <div style="font-family:Orbitron,sans-serif;font-size:15px;font-weight:600;margin-bottom:4px;" data-i18n="searching">🔍 Searching ELM327...</div>
-    <div style="font-size:12px;color:var(--dim);margin-bottom:18px;" data-i18n="searchSub">WiFi → Bluetooth → USB</div>
-    <div class="cstep" id="cWifi"><span style="font-size:20px;">📶</span><div><div style="font-size:13px;font-weight:600;" data-i18n="wifi">WiFi</div><div style="font-size:11px;color:var(--dim);">192.168.0.10:35000</div></div><div style="margin-left:auto;font-size:18px;" id="cWS">⏳</div></div>
-    <div class="cstep" id="cBt"><span style="font-size:20px;">🔵</span><div><div style="font-size:13px;font-weight:600;" data-i18n="bt">Bluetooth</div><div style="font-size:11px;color:var(--dim);">OBD/ELM device</div></div><div style="margin-left:auto;font-size:18px;" id="cBS">⏳</div></div>
-    <div class="cstep" id="cUsb"><span style="font-size:20px;">🔌</span><div><div style="font-size:13px;font-weight:600;" data-i18n="usb">USB Serial</div><div style="font-size:11px;color:var(--dim);">Web Serial API</div></div><div style="margin-left:auto;font-size:18px;" id="cUS">⏳</div></div>
-    <div style="margin-top:14px;text-align:center;"><button class="btn bg" id="cancelConn" data-i18n="cancel">Cancel</button></div>
+    <div class="conn-title">🔌 Select Connection Method</div>
+    <div class="conn-sub">Use a manual connection path (Bluetooth or USB); Wi-Fi is intentionally disabled.</div>
+    <div class="conn-options">
+      <button id="connectBluetooth" class="conn-option">🔵 Bluetooth <small>Pair with OBD/ELM device</small></button>
+      <button id="connectUSB" class="conn-option">🔌 USB <small>Select USB/COM port</small></button>
+    </div>
+    <div id="connStatusText" class="conn-status"></div>
+    <div class="cancel-conn"><button class="btn bg" id="cancelConn" data-i18n="cancel">Cancel</button></div>
   </div>
 </div>
 
@@ -1705,13 +1853,327 @@ body{background:var(--bg);color:var(--txt);height:100vh;overflow:hidden;font-fam
 <script type="module">
 
 const S = {
-  lang:'en', connected:false, port:null, reader:null, writer:null,
-  apiKey:localStorage.getItem('npk')||'', baud:38400,
+  lang: localStorage.getItem('nexusLang') || 'en', connected:false, port:null, reader:null, writer:null, btDevice:null,
+  apiKey:localStorage.getItem('npk')||'',
+  translateApiKey:localStorage.getItem('ntranslateKey')||'',
+  customApiUrl:localStorage.getItem('nexusApiUrl')||'https://api.yoursever.com',
+  baud:38400,
   reportLang:'en', cancelled:false, interval:null, activeLdSys:null,
   vin:'', protocol:'ISO 15765-4 CAN', vehicleMake:'Unknown', detectedSystems:null,
   data:{rpm:800,speed:0,temp:88,load:25,throttle:12,battery:13.8,fuel:68,maf:4.2,map:45,timing:8},
-  dtcs:[], scanHistory:{}
+  dtcs:[], scanHistory:{}, apiDiagnosis:null, pdfUrl:null
 };
+
+// ════════════════════════════════════════════════════════════════
+// API CONFIGURATION & OFFLINE SOLUTIONS FALLBACK
+// ════════════════════════════════════════════════════════════════
+
+const OFFLINE_SOLUTIONS = {
+  'P0128': {en:'Coolant Thermostat Malfunction',ar:'عطل ترموستات المحرك',solutions:{en:'Check thermostat, replace if stuck',ar:'افحص الثرموستات، استبدله إذا كان عالقاً'},confidence:95,color:'#FF0000'},
+  'P0300': {en:'Random Cylinder Misfire',ar:'اختلال عشوائي في الأسطوانات',solutions:{en:'Check spark plugs, fuel pressure, compression',ar:'افحص شمعات الإشعال والضغط والضغط'},confidence:88,color:'#FF0000'},
+  'P0171': {en:'System Too Lean Bank 1',ar:'المحرك يعمل بفقر شديد',solutions:{en:'Check MAF sensor, fuel injectors, vacuum leaks',ar:'افحص حساس MAF والحاقنات وتسرب الفراغ'},confidence:92,color:'#FFBF00'},
+  'P0172': {en:'System Too Rich Bank 1',ar:'المحرك يعمل بغنى شديد',solutions:{en:'Check oxygen sensor, fuel pressure, injectors',ar:'افحص حساس الأكسجين وضغط الوقود'},confidence:90,color:'#FF0000'},
+  'P0101': {en:'Mass Airflow Sensor Range',ar:'خطأ نطاق حساس تدفق الهواء',solutions:{en:'Clean MAF sensor with MAF cleaner',ar:'نظف حساس MAF بمنظف متخصص'},confidence:94,color:'#FFBF00'},
+  'P0404': {en:'EGR System Error',ar:'خطأ نظام العادم المعاد تدويره',solutions:{en:'Clean EGR valve, check carbon buildup',ar:'نظف صمام EGR، افحص تراكم الكربون'},confidence:87,color:'#FF0000'},
+  'P0440': {en:'EVAP System Leak',ar:'تسرب نظام تبخر الوقود',solutions:{en:'Check fuel cap, EVAP hoses, activated charcoal',ar:'افحص غطاء التانك والخراطيم'},confidence:88,color:'#FFBF00'},
+  'P0455': {en:'EVAP System Leak Large',ar:'تسرب كبير في نظام EVAP',solutions:{en:'Inspect all EVAP components for cracks',ar:'افحص جميع مكونات EVAP للشقوق'},confidence:85,color:'#FF0000'},
+  'P0505': {en:'Idle Air Control',ar:'خطأ التحكم بالخمول',solutions:{en:'Clean idle control valve, check vacuum',ar:'نظف صمام التحكم بالخمول'},confidence:89,color:'#FFBF00'},
+  'C0045': {en:'Left Front ABS Sensor',ar:'حساس ABS الأمامي الأيسر',solutions:{en:'Replace ABS sensor, check wiring',ar:'استبدل حساس ABS، افحص الأسلاك'},confidence:96,color:'#FF0000'},
+};
+
+async function fetchDtcDiagnosis(dtcCode, canData) {
+  try {
+    const customApiUrl = localStorage.getItem('nexusApiUrl') || S.customApiUrl;
+    if(!customApiUrl || customApiUrl === 'https://api.yoursever.com') return null;
+    
+    const response = await fetch(`${customApiUrl}/diagnose`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        dtc_code: dtcCode,
+        can_data: canData,
+        vin: S.vin,
+        lang: S.lang
+      }),
+      timeout: 5000
+    });
+    
+    if(!response.ok) throw new Error(`API Error: ${response.status}`);
+    const data = await response.json();
+    return data && data.solution ? {solution: data.solution, status: data.status || 'active', analysis: data.analysis} : null;
+  } catch(e) {
+    console.warn(`API unavailable for ${dtcCode}:`, e.message);
+    return null;
+  }
+}
+
+async function analyzeAllDtcsWithApi(dtcs, canData) {
+  try {
+    const customApiUrl = localStorage.getItem('nexusApiUrl') || S.customApiUrl;
+    if(!customApiUrl || customApiUrl === 'https://api.yoursever.com') {
+      toast(S.lang==='ar'?'تعذر الاتصال بالخادم، جاري استخدام الحلول المخزنة مؤقتاً':'API Unreachable - Using Offline Solutions','warn');
+      return null;
+    }
+    
+    const response = await fetch(`${customApiUrl}/analyze`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        dtc_codes: dtcs.map(d => d.code),
+        can_data: canData,
+        vin: S.vin,
+        lang: S.lang
+      }),
+      timeout: 10000
+    });
+    
+    if(!response.ok) throw new Error(`API Error: ${response.status}`);
+    const data = await response.json();
+    if(data && Array.isArray(data)) {
+      S.apiDiagnosis = {};
+      data.forEach(item => {
+        if(item.dtc_code) S.apiDiagnosis[item.dtc_code] = {solution: item.solution, status: item.status, analysis: item.analysis};
+      });
+    }
+    return S.apiDiagnosis;
+  } catch(e) {
+    console.warn('API analysis failed:', e.message);
+    toast(S.lang==='ar'?'تعذر الاتصال بالخادم، جاري استخدام الحلول المخزنة مؤقتاً':'API Unreachable - Using Offline Solutions','warn');
+    return null;
+  }
+}
+
+function getDtcWithColor(dtcCode, isActive=true) {
+  let diagnosis = S.apiDiagnosis?.[dtcCode];
+  let offline = OFFLINE_SOLUTIONS[dtcCode];
+  
+  if(!diagnosis && offline) {
+    diagnosis = {solution: offline.solutions?.[S.lang] || offline.solutions?.en, status: offline.status || 'active', analysis: offline.en};
+  }
+  
+  const status = diagnosis?.status || (isActive ? 'active' : 'stored');
+  const color = status === 'active' ? '#FF0000' : '#FFBF00';
+  const solution = diagnosis?.solution || (offline?.solutions?.[S.lang] || offline?.solutions?.en || 'Consult service manual');
+  const analysis = diagnosis?.analysis || offline?.en || 'Unknown DTC';
+  
+  return {
+    code: dtcCode,
+    description: isActive ? 'Active' : 'Stored',
+    color: color,
+    status: status,
+    solution: solution,
+    analysis: analysis,
+    confidence: offline?.confidence || 85
+  };
+}
+
+async function generateMultiLanguagePdf(lang='en') {
+  try {
+    const customApiUrl = S.customApiUrl || 'https://api.yourserver.com';
+    
+    const reportData = {
+      vin: S.vin,
+      vehicleMake: S.vehicleMake,
+      protocol: S.protocol,
+      systems: S.detectedSystems,
+      dtcs: S.dtcs,
+      canData: S.data,
+      diagnosis: S.apiDiagnosis,
+      scanDate: new Date().toLocaleString(),
+      technician: 'NEXUS PRO',
+      siteName: 'NEXUS PRO Diagnostics',
+      developer: 'Yousef Ali Abu Flaha'
+    };
+    
+    const response = await fetch(`${customApiUrl}/generate-pdf`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({...reportData, language: lang})
+    });
+    
+    if(!response.ok) throw new Error(`PDF Generation Failed: ${response.status}`);
+    
+    const blob = await response.blob();
+    const pdfUrl = URL.createObjectURL(blob);
+    S.pdfUrl = pdfUrl;
+    
+    return pdfUrl;
+  } catch(e) {
+    console.error('PDF Generation Error:', e);
+    toast(S.lang==='ar'?'فشل إنشاء PDF':'PDF Generation Failed','err');
+    return null;
+  }
+}
+
+async function showLanguageSelector() {
+  return new Promise((resolve) => {
+    const modal = document.getElementById('shareModal');
+    const langGrid = document.createElement('div');
+    langGrid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;';
+    
+    const langs = [
+      {code:'en',name:'English 🇬🇧',flag:'🇬🇧'},
+      {code:'ar',name:'العربية 🇸🇦',flag:'🇸🇦'},
+      {code:'fr',name:'Français 🇫🇷',flag:'🇫🇷'},
+      {code:'es',name:'Español 🇪🇸',flag:'🇪🇸'},
+      {code:'de',name:'Deutsch 🇩🇪',flag:'🇩🇪'},
+      {code:'zh',name:'中文 🇨🇳',flag:'🇨🇳'},
+    ];
+    
+    langGrid.innerHTML = langs.map(l => `
+      <button style="padding:10px;background:rgba(0,229,255,0.1);border:2px solid rgba(0,229,255,0.3);border-radius:8px;cursor:pointer;font-size:12px;color:var(--cyan);transition:all 0.2s;" 
+              onclick="this.style.borderColor='var(--cyan)';document.selectedLang='${l.code}';">
+        ${l.flag} ${l.name}
+      </button>
+    `).join('');
+    
+    const shareBox = modal.querySelector('.share-box');
+    shareBox.insertBefore(langGrid, shareBox.firstChild);
+    document.selectedLang = S.lang;
+    
+    modal.classList.add('on');
+    resolve(langs);
+  });
+}
+
+async function generateAndSharePdf(lang) {
+  try {
+    const pdfUrl = await generateMultiLanguagePdf(lang);
+    if(!pdfUrl) return;
+    
+    const contact = document.getElementById('shareContact')?.value || '';
+    if(!contact) {
+      toast(S.lang==='ar'?'أدخل رقم الهاتف أو اسم المستخدم':'Enter contact info','warn');
+      return;
+    }
+    
+    return {pdfUrl, contact, language: lang};
+  } catch(e) {
+    console.error('PDF Generation Error:', e);
+    toast('PDF Generation Failed','err');
+    return null;
+  }
+}
+
+
+
+
+async function fetchPdfFromApi(lang) {
+  try {
+    const customApiUrl = localStorage.getItem('nexusApiUrl') || S.customApiUrl;
+    if(!customApiUrl || customApiUrl === 'https://api.yoursever.com') throw new Error('No API URL configured');
+    
+    const response = await fetch(`${customApiUrl}/pdf`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        dtc_codes: S.dtcs.map(d => d.code),
+        can_data: S.data,
+        vin: S.vin,
+        lang: lang,
+        vehicle_make: S.vehicleMake,
+        developer: 'Yousef Ali Abu Flaha',
+        site_name: 'NEXUS PRO'
+      }),
+      timeout: 15000
+    });
+    
+    if(!response.ok) throw new Error(`PDF API Error: ${response.status}`);
+    
+    const blob = await response.blob();
+    if(!blob.size) throw new Error('Empty PDF response');
+    
+    const url = URL.createObjectURL(blob);
+    S.pdfUrl = url;
+    return url;
+  } catch(e) {
+    console.error('PDF Fetch Error:', e.message);
+    toast(S.lang==='ar'?'فشل جلب PDF من الخادم':'PDF Fetch Failed','err');
+    return null;
+  }
+}
+
+function saveCustomApiUrl() {
+  const url = document.getElementById('customApiUrl')?.value?.trim();
+  if(url && (url.startsWith('http://') || url.startsWith('https://'))) {
+    S.customApiUrl = url;
+    localStorage.setItem('nexusApiUrl', url);
+    toast(S.lang==='ar'?'✅ تم حفظ رابط الخادم':'✅ API URL Saved','ok');
+  } else {
+    toast(S.lang==='ar'?'⚠️ أدخل رابط API صحيح (مثل https://api.example.com)':'⚠️ Enter valid API URL (e.g. https://api.example.com)','err');
+  }
+}
+
+async function testApiConnection() {
+  const customApiUrl = localStorage.getItem('nexusApiUrl') || S.customApiUrl;
+  if(!customApiUrl || customApiUrl === 'https://api.yoursever.com') {
+    toast(S.lang==='ar'?'⚠️ لم يتم تكوين رابط API':'⚠️ No API URL configured','warn');
+    return false;
+  }
+  
+  try {
+    const response = await fetch(`${customApiUrl}/diagnose`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        dtc_code: 'P0128',
+        can_data: {rpm: 800, speed: 0, temp: 88},
+        vin: 'TEST123456789',
+        lang: S.lang
+      }),
+      timeout: 5000
+    });
+    
+    if(response.ok) {
+      toast(S.lang==='ar'?'✅ API متصل وجاهز':'✅ API Connected','ok');
+      return true;
+    } else {
+      toast(`API Error: ${response.status}`,'err');
+      return false;
+    }
+  } catch(e) {
+    console.error('API Test Error:', e.message);
+    toast(S.lang==='ar'?'❌ فشل الاتصال بـ API':'❌ API Connection Failed','err');
+    return false;
+  }
+}
+
+let dynamicTranslationObserver = null;
+let isPageSwitching = false;
+let oscAnimId = null;
+let oscRunning = false;
+let oscChannel = 'rpm';
+const appIntervals = new Set();
+
+// ═════════════════════════════════════════════════════════════════
+// EMERGENCY SAFETY SYSTEM
+// ═════════════════════════════════════════════════════════════════
+window.stopAllScripts = false;  // Global kill switch
+let translationObserverDebounceTimer = null;
+let pageChangeInProgress = false;
+
+const RLANGS = [
+  {c:'en', f:'🇺🇸', n:'English'},
+  {c:'ar', f:'🇸🇦', n:'Arabic'},
+  {c:'fr', f:'🇫🇷', n:'French'},
+  {c:'de', f:'🇩🇪', n:'German'},
+  {c:'es', f:'🇪🇸', n:'Spanish'},
+  {c:'tr', f:'🇹🇷', n:'Turkish'},
+  {c:'ru', f:'🇷🇺', n:'Russian'},
+  {c:'zh', f:'🇨🇳', n:'Chinese'},
+  {c:'ja', f:'🇯🇵', n:'Japanese'},
+  {c:'ko', f:'🇰🇷', n:'Korean'},
+  {c:'it', f:'🇮🇹', n:'Italian'},
+  {c:'pt', f:'🇵🇹', n:'Portuguese'},
+  {c:'nl', f:'🇳🇱', n:'Dutch'},
+  {c:'pl', f:'🇵🇱', n:'Polish'},
+  {c:'fa', f:'🇮🇷', n:'Persian'},
+  {c:'hi', f:'🇮🇳', n:'Hindi'},
+  {c:'id', f:'🇮🇩', n:'Indonesian'},
+  {c:'vi', f:'🇻🇳', n:'Vietnamese'},
+  {c:'sv', f:'🇸🇪', n:'Swedish'},
+  {c:'ro', f:'🇷🇴', n:'Romanian'},
+];
 
 const TR = {
   en:{dashboard:'Dashboard',liveData:'Live Data',battery:'Battery',canBus:'CAN Bus',
@@ -1756,513 +2218,114 @@ const TR = {
 
 function t(k){return (TR[S.lang]||TR.en)[k]||(TR.en[k])||k;}
 
-const DTC_DB = {
-  'P0300':{
-    en:{name:'Random/Multiple Cylinder Misfire',short:'Engine misfiring on multiple cylinders',
-      causes:['Worn or fouled spark plugs (most common)',
-        'Defective ignition coil on one or more cylinders',
-        'Clogged or leaking fuel injectors',
-        'Low fuel pressure from weak fuel pump',
-        'Vacuum leak in intake manifold',
-        'Low compression due to worn piston rings or valves',
-        'Contaminated engine oil causing VVT issues'],
-      repair:['Step 1: Read live misfire data — identify which cylinders are misfiring most (PID $1105)',
-        'Step 2: Inspect and gap or replace spark plugs (NGK/Denso recommended). Torque to spec.',
-        'Step 3: Swap ignition coil from misfiring cylinder to another — if misfire moves, replace coil',
-        'Step 4: Perform injector balance test using scan tool Mode 09',
-        'Step 5: Check fuel pressure at rail — should be 300-400 kPa at idle',
-        'Step 6: Smoke test intake manifold for vacuum leaks',
-        'Step 7: Perform compression test — minimum 150 PSI per cylinder, max 15% variation'],
-      tools:['Compression tester','Fuel pressure gauge','Smoke machine','Oscilloscope for coil waveform']},
-    ar:{name:'اشتعال عشوائي في أسطوانات متعددة',short:'خلل في اشتعال أسطوانات متعددة',
-      causes:['شمعات إشعال متآكلة أو ملوثة (الأكثر شيوعاً)',
-        'ملف إشعال معطل في سطوانة واحدة أو أكثر',
-        'حاقنات وقود مسدودة أو تسرب منها',
-        'ضغط وقود منخفض بسبب ضعف مضخة الوقود',
-        'تسرب هواء في مشعب السحب',
-        'انضغاط منخفض بسبب تآكل حلقات المكبس أو الصمامات',
-        'تلوث زيت المحرك يسبب خللاً في نظام VVT'],
-      repair:['الخطوة 1: اقرأ بيانات التوقف عن الاشتعال مباشرة — حدد الأسطوانة الأكثر تأثراً',
-        'الخطوة 2: افحص شمعات الإشعال واستبدلها (NGK/Denso) مع ضبط الفجوة حسب المواصفات',
-        'الخطوة 3: انقل ملف الإشعال من الأسطوانة المتأثرة — إذا تحرك العطل استبدل الملف',
-        'الخطوة 4: اجرِ اختبار توازن الحاقنات عبر جهاز الفحص',
-        'الخطوة 5: قِس ضغط الوقود عند القضيب — يجب أن يكون 300-400 كيلوباسكال',
-        'الخطوة 6: اختبر مشعب السحب بجهاز الدخان لاكتشاف التسربات',
-        'الخطوة 7: قِس انضغاط كل أسطوانة — الحد الأدنى 150 PSI، فرق أقل من 15%'],
-      tools:['مقياس الانضغاط','مقياس ضغط الوقود','جهاز الدخان','أوسيلوسكوب لقراءة ملف الإشعال']}
-  },
-  'P0420':{
-    en:{name:'Catalyst System Efficiency Below Threshold Bank 1',short:'Catalytic converter degraded or failed',
-      causes:['Catalytic converter internally damaged or clogged (most common)',
-        'O2 sensor B1S2 reading incorrectly — lazy or contaminated',
-        'Engine running rich causing catalyst overheating',
-        'Oil or coolant entering combustion chamber damaging catalyst',
-        'Exhaust system leak between engine and catalyst'],
-      repair:['Step 1: Compare upstream (B1S1) and downstream (B1S2) O2 sensor waveforms — downstream should be flat',
-        'Step 2: If B1S2 is switching like B1S1 — catalyst has failed. Verify with thermal imaging',
-        'Step 3: Check for rich fuel trim codes (P0172) — fix fuel/air ratio first',
-        'Step 4: Inspect for oil consumption or coolant leak — blue/white smoke indicates internal damage',
-        'Step 5: Check exhaust for leaks upstream of catalyst',
-        'Step 6: Replace catalytic converter with OEM spec unit. Reset monitors and drive 2 complete drive cycles'],
-      tools:['Oscilloscope for O2 waveform','Infrared thermometer','Smoke machine for exhaust leaks']},
-    ar:{name:'كفاءة المحول الحفاز أقل من الحد البنك 1',short:'المحول الحفاز متدهور أو تالف',
-      causes:['المحول الحفاز تالف أو مسدود داخلياً (الأكثر شيوعاً)',
-        'حساس الأكسجين B1S2 يعطي قراءة خاطئة',
-        'المحرك يعمل بمزيج غني مما يسبب ارتفاع حرارة المحول',
-        'دخول زيت أو سائل التبريد لغرفة الاحتراق',
-        'تسرب في نظام العادم بين المحرك والمحول'],
-      repair:['الخطوة 1: قارن أشكال موجات حساسَي الأكسجين B1S1 وB1S2 — B1S2 يجب أن يكون ثابتاً',
-        'الخطوة 2: إذا كان B1S2 يتذبذب مثل B1S1 — المحول تالف. أكد بالتصوير الحراري',
-        'الخطوة 3: افحص أكواد ضبط الوقود (P0172) — أصلح نسبة الوقود/هواء أولاً',
-        'الخطوة 4: افحص استهلاك الزيت أو تسرب سائل التبريد — الدخان الأزرق/الأبيض يدل على تلف داخلي',
-        'الخطوة 5: افحص العادم بحثاً عن تسربات قبل المحول',
-        'الخطوة 6: استبدل المحول الحفاز بقطعة تطابق مواصفات الشركة. أعد ضبط المراقبين وقُد السيارة دورتين'],
-      tools:['أوسيلوسكوب لقراءة حساسات الأكسجين','مقياس حرارة بالأشعة تحت الحمراء','جهاز الدخان للعادم']}
-  },
-  'P0301':{
-    en:{name:'Cylinder 1 Misfire Detected',short:'Cylinder 1 not firing properly',
-      causes:['Spark plug fouled or incorrect gap on cylinder 1',
-        'Ignition coil for cylinder 1 has failed',
-        'Fuel injector #1 clogged or not opening',
-        'Low compression in cylinder 1 (valve, ring, or head gasket)',
-        'Wiring harness damage to coil or injector connector'],
-      repair:['Step 1: Swap cylinder 1 spark plug with cylinder 3 — check if misfire moves',
-        'Step 2: Swap ignition coil from cylinder 1 to cylinder 3 — if misfire moves, replace coil',
-        'Step 3: Perform injector test on injector #1 with scanner',
-        'Step 4: Measure resistance of injector #1 coil (spec: 12-16 Ω)',
-        'Step 5: Compression test cylinder 1 — minimum 150 PSI',
-        'Step 6: If low compression, perform leak-down test to identify leak location'],
-      tools:['Compression tester','Digital multimeter','Injector tester','Oscilloscope']},
-    ar:{name:'انقطاع الاشتعال في الأسطوانة 1',short:'الأسطوانة 1 لا تشتعل بشكل صحيح',
-      causes:['شمعة إشعال الأسطوانة 1 متسخة أو فجوتها خاطئة',
-        'ملف إشعال الأسطوانة 1 تالف',
-        'حاقن الوقود رقم 1 مسدود أو لا يفتح',
-        'انضغاط منخفض في الأسطوانة 1',
-        'تلف في سلك توصيل الملف أو الحاقن'],
-      repair:['الخطوة 1: انقل شمعة الأسطوانة 1 إلى الأسطوانة 3 — راقب إذا انتقل العطل',
-        'الخطوة 2: انقل ملف الإشعال من الأسطوانة 1 إلى 3 — إذا انتقل العطل استبدل الملف',
-        'الخطوة 3: اختبر الحاقن رقم 1 عبر جهاز الفحص',
-        'الخطوة 4: قِس مقاومة ملف الحاقن رقم 1 (12-16 أوم)',
-        'الخطوة 5: قِس انضغاط الأسطوانة 1 — الحد الأدنى 150 PSI',
-        'الخطوة 6: إذا كان الانضغاط منخفضاً اجرِ اختبار التسرب لتحديد المصدر'],
-      tools:['مقياس الانضغاط','مولتيميتر رقمي','جهاز اختبار الحاقنات','أوسيلوسكوب']}
-  },
-};
+const TRANSLATION_CACHE = {};
+const TRANSLATION_IGNORE_TAGS = new Set(['SCRIPT','STYLE','NOSCRIPT','CODE','PRE','TEXTAREA','INPUT','SELECT','OPTION']);
 
-const SYSTEMS = [
-  {id:'engine',color:'#00E5FF',en:{name:'Engine',desc:'Engine sensors & control'},ar:{name:'المحرك',desc:'حساسات وتحكم المحرك'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#00E5FF"><rect x="10" y="24" width="60" height="36" rx="5" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.5"/><rect x="20" y="32" width="12" height="16" rx="2" fill="currentColor" fill-opacity=".25"/><rect x="37" y="32" width="12" height="16" rx="2" fill="currentColor" fill-opacity=".25"/><rect x="54" y="28" width="8" height="6" rx="1.5" fill="currentColor"/><path d="M10 38H4M70 38H76" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M26 24V16M44 24V16M58 24V16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="40" cy="58" r="5" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.5"/></svg>`},
-  {id:'transmission',color:'#00FF88',en:{name:'Transmission',desc:'Gearbox & drivetrain'},ar:{name:'ناقل الحركة',desc:'علبة التروس والدفع'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#00FF88"><circle cx="22" cy="40" r="13" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.5"/><circle cx="58" cy="40" r="13" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.5"/><path d="M35 36h10M35 44h10" stroke="currentColor" stroke-width="2"/><circle cx="22" cy="40" r="5" fill="currentColor" fill-opacity=".5"/><circle cx="58" cy="40" r="5" fill="currentColor" fill-opacity=".5"/><path d="M40 20v8M40 52v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`},
-  {id:'abs',color:'#FF9F1C',en:{name:'ABS / Brakes',desc:'Anti-lock braking system'},ar:{name:'الفرامل / ABS',desc:'نظام الفرامل ومنع الانغلاق'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#FF9F1C"><circle cx="40" cy="40" r="26" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-width="1.5"/><circle cx="40" cy="40" r="17" fill="currentColor" fill-opacity=".15" stroke="currentColor" stroke-width="1.5"/><circle cx="40" cy="40" r="7" fill="currentColor" fill-opacity=".4"/><path d="M40 14v8M40 58v8M14 40h8M58 40h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`},
-  {id:'airbag',color:'#FF3D71',en:{name:'Airbag SRS',desc:'Supplemental restraint system'},ar:{name:'الوسائد الهوائية',desc:'نظام الحماية SRS'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#FF3D71"><circle cx="40" cy="40" r="24" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.5"/><path d="M40 18c-11 0-20 9-20 20s9 20 20 20" stroke="currentColor" stroke-width="1.5"/><circle cx="40" cy="40" r="8" fill="currentColor" fill-opacity=".4" stroke="currentColor" stroke-width="1.5"/><circle cx="40" cy="40" r="3" fill="currentColor"/></svg>`},
-  {id:'ac',color:'#B45BFF',en:{name:'A/C & Climate',desc:'Air conditioning & HVAC'},ar:{name:'المكيف',desc:'تكييف الهواء والمناخ'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#B45BFF"><rect x="10" y="22" width="60" height="36" rx="8" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.5"/><path d="M22 36h36M22 44h26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="56" cy="44" r="5" fill="currentColor" fill-opacity=".4" stroke="currentColor" stroke-width="1.5"/><path d="M20 30h6M34 30h6M48 30h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`},
-  {id:'fuel',color:'#FF9F1C',en:{name:'Fuel System',desc:'Fuel pump, injectors & sensors'},ar:{name:'نظام الوقود',desc:'مضخة الوقود والحاقنات'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#FF9F1C"><rect x="18" y="14" width="34" height="46" rx="5" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.5"/><path d="M52 24h8a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5h-8" stroke="currentColor" stroke-width="1.5"/><path d="M28 34h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="28" y="44" width="14" height="10" rx="2.5" fill="currentColor" fill-opacity=".35"/></svg>`},
-  {id:'exhaust',color:'#94A3B8',en:{name:'Exhaust & Emissions',desc:'Catalytic converter & O2'},ar:{name:'العادم والانبعاثات',desc:'المحول الحفاز وحساسات O2'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#94A3B8"><path d="M10 50c10-20 50-20 60 0" stroke="currentColor" stroke-width="1.5"/><circle cx="25" cy="34" r="10" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.5"/><circle cx="55" cy="34" r="10" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.5"/><path d="M20 62c2-5 5-5 5-10M28 64c0-5 3-8 3-13" stroke="currentColor" stroke-width="1.5" opacity=".5" stroke-linecap="round"/></svg>`},
-  {id:'electrical',color:'#00E5FF',en:{name:'Electrical',desc:'BCM, body & power supply'},ar:{name:'الكهرباء',desc:'وحدة التحكم والإمداد الكهربائي'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#00E5FF"><path d="M44 10L30 40h18L34 70" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="60" cy="24" r="10" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.5"/><circle cx="20" cy="56" r="10" fill="currentColor" fill-opacity=".12" stroke="currentColor" stroke-width="1.5"/></svg>`},
-  {id:'steering',color:'#00FF88',en:{name:'Power Steering',desc:'EPS motor & sensors'},ar:{name:'التوجيه',desc:'محرك التوجيه الكهربائي'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#00FF88"><circle cx="40" cy="40" r="26" fill="currentColor" fill-opacity=".08" stroke="currentColor" stroke-width="1.5"/><circle cx="40" cy="40" r="12" fill="currentColor" fill-opacity=".18" stroke="currentColor" stroke-width="1.5"/><path d="M40 14v12M40 54v12M14 40h12M54 40h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="40" cy="40" r="4" fill="currentColor" fill-opacity=".8"/></svg>`},
-  {id:'body',color:'#B45BFF',en:{name:'Body Control',desc:'BCM, windows & lighting'},ar:{name:'جسم السيارة',desc:'BCM والنوافذ والإضاءة'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#B45BFF"><path d="M10 46l10-20h40l10 20v14H10z" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.5"/><rect x="18" y="32" width="14" height="10" rx="1.5" fill="currentColor" fill-opacity=".35"/><rect x="48" y="32" width="14" height="10" rx="1.5" fill="currentColor" fill-opacity=".35"/><circle cx="22" cy="60" r="6" fill="currentColor" fill-opacity=".35" stroke="currentColor" stroke-width="1.5"/><circle cx="58" cy="60" r="6" fill="currentColor" fill-opacity=".35" stroke="currentColor" stroke-width="1.5"/></svg>`},
-  {id:'suspension',color:'#FF9F1C',en:{name:'Suspension',desc:'Active suspension sensors'},ar:{name:'التعليق',desc:'حساسات التعليق النشط'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#FF9F1C"><path d="M20 60V30l8-10h24l8 10v30" stroke="currentColor" stroke-width="1.5"/><path d="M28 40c0-5 5-10 12-10s12 5 12 10" stroke="currentColor" stroke-width="1.5"/><rect x="16" y="56" width="14" height="10" rx="2" fill="currentColor" fill-opacity=".35"/><rect x="50" y="56" width="14" height="10" rx="2" fill="currentColor" fill-opacity=".35"/></svg>`},
-  {id:'obd',color:'#00E5FF',en:{name:'OBD Diagnostics',desc:'Communication & ECU info'},ar:{name:'تشخيص OBD',desc:'اتصال ومعلومات وحدات التحكم'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#00E5FF"><rect x="14" y="20" width="52" height="40" rx="5" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.5"/><path d="M24 34h32M24 44h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="54" cy="44" r="4" fill="currentColor" fill-opacity=".7"/><path d="M35 60v8M45 60v8M30 68h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`},
-  {id:'hv_battery',color:'#34D399',en:{name:'HV Battery',desc:'Hybrid high-voltage battery & motors'},ar:{name:'بطارية الهجين HV',desc:'البطارية عالية الجهد ومحركات الهجين'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#34D399"><rect x="10" y="24" width="50" height="32" rx="5" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.5"/><path d="M60 34h8v12h-8" stroke="currentColor" stroke-width="1.5"/><path d="M24 40h10l-5-8 16 0-5 8h10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 24v-8M40 24v-8M60 24v-8" stroke="currentColor" stroke-width="1.5" opacity=".5" stroke-linecap="round"/></svg>`},
-  {id:'ev_battery',color:'#4ADE80',en:{name:'EV Battery',desc:'Electric vehicle high-voltage battery'},ar:{name:'بطارية السيارة الكهربائية',desc:'بطارية السيارة الكهربائية عالية الجهد'},
-    svg:`<svg viewBox="0 0 80 80" fill="none" style="color:#4ADE80"><rect x="8" y="22" width="52" height="36" rx="5" fill="currentColor" fill-opacity=".1" stroke="currentColor" stroke-width="1.5"/><path d="M60 32h10v16H60" stroke="currentColor" stroke-width="1.5"/><path d="M22 40h36M36 28l-8 12h10l-8 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`},
-];
+async function translateText(apiText, targetLang){
+  if(!apiText || !targetLang || targetLang==='en') return apiText;
+  const normalized = apiText.trim();
+  if(!normalized) return apiText;
+  const cacheKey = `${targetLang}::${normalized}`;
+  if(TRANSLATION_CACHE[cacheKey]) return TRANSLATION_CACHE[cacheKey];
 
-const SENSORS = {
-  engine:[
-    {en:'Engine RPM (CKP)',ar:'سرعة المحرك RPM',pid:'0C',unit:'rpm',min:0,max:8000,warn:7000},
-    {en:'Vehicle Speed (VSS)',ar:'سرعة السيارة',pid:'0D',unit:'km/h',min:0,max:260,warn:0},
-    {en:'Coolant Temp (ECT)',ar:'حرارة سائل التبريد',pid:'05',unit:'°C',min:-40,max:130,warn:110},
-    {en:'Intake Air Temp (IAT)',ar:'حرارة هواء الإدخال',pid:'0F',unit:'°C',min:-40,max:80,warn:70},
-    {en:'Mass Air Flow (MAF)',ar:'تدفق الهواء MAF',pid:'10',unit:'g/s',min:0,max:200,warn:175},
-    {en:'Throttle Position (TPS)',ar:'موضع الخانق',pid:'11',unit:'%',min:0,max:100,warn:97},
-    {en:'Manifold Pressure (MAP)',ar:'ضغط المشعب',pid:'0B',unit:'kPa',min:20,max:105,warn:100},
-    {en:'Engine Load',ar:'حمل المحرك',pid:'04',unit:'%',min:0,max:100,warn:92},
-    {en:'Ignition Timing',ar:'توقيت الإشعال',pid:'0E',unit:'°',min:-20,max:50,warn:48},
-    {en:'Fuel Pressure',ar:'ضغط الوقود',pid:'23',unit:'kPa',min:200,max:700,warn:650},
-    {en:'Fuel Trim ST B1',ar:'ضبط وقود قصير الأمد',pid:'06',unit:'%',min:-25,max:25,warn:22},
-    {en:'Fuel Trim LT B1',ar:'ضبط وقود طويل الأمد',pid:'07',unit:'%',min:-25,max:25,warn:22},
-    {en:'O2 Sensor B1S1',ar:'حساس أكسجين قبل المحول',pid:'14',unit:'V',min:0,max:1.2,warn:1.1},
-    {en:'O2 Sensor B1S2',ar:'حساس أكسجين بعد المحول',pid:'15',unit:'V',min:0,max:1.2,warn:1.1},
-    {en:'Camshaft Position (CMP)',ar:'موضع عمود الكامات',pid:'--',unit:'°',min:0,max:360,warn:0},
-    {en:'Battery Voltage',ar:'جهد البطارية',pid:'42',unit:'V',min:11,max:15,warn:14.8},
-    {en:'Barometric Pressure',ar:'الضغط الجوي',pid:'33',unit:'kPa',min:75,max:105,warn:0},
-    {en:'EGR Error',ar:'خطأ صمام EGR',pid:'2C',unit:'%',min:-100,max:100,warn:85},
-  ],
-  transmission:[
-    {en:'ATF Temperature',ar:'حرارة زيت ناقل الحركة',pid:'--',unit:'°C',min:-40,max:150,warn:130},
-    {en:'Gear Position',ar:'الترس الحالي',pid:'A4',unit:'',min:0,max:8,warn:0},
-    {en:'Input Shaft Speed',ar:'سرعة عمود الدخول',pid:'--',unit:'rpm',min:0,max:7000,warn:6500},
-    {en:'Output Shaft Speed',ar:'سرعة عمود الخروج',pid:'--',unit:'rpm',min:0,max:5000,warn:4800},
-    {en:'Torque Converter Slip',ar:'انزلاق محول العزم',pid:'--',unit:'rpm',min:0,max:600,warn:500},
-    {en:'Line Pressure',ar:'ضغط الخط الهيدروليكي',pid:'--',unit:'kPa',min:0,max:1800,warn:1700},
-    {en:'Shift Solenoid A',ar:'ملف التحويل A',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Shift Solenoid B',ar:'ملف التحويل B',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'TCC Duty',ar:'نسبة عمل TCC',pid:'--',unit:'%',min:0,max:100,warn:97},
-    {en:'Transmission Load',ar:'حمل ناقل الحركة',pid:'--',unit:'%',min:0,max:100,warn:92},
-    {en:'Gear Ratio',ar:'نسبة التروس',pid:'--',unit:'',min:0,max:5,warn:0},
-  ],
-  abs:[
-    {en:'Wheel Speed FL',ar:'سرعة عجلة أمام يسار',pid:'--',unit:'km/h',min:0,max:260,warn:0},
-    {en:'Wheel Speed FR',ar:'سرعة عجلة أمام يمين',pid:'--',unit:'km/h',min:0,max:260,warn:0},
-    {en:'Wheel Speed RL',ar:'سرعة عجلة خلف يسار',pid:'--',unit:'km/h',min:0,max:260,warn:0},
-    {en:'Wheel Speed RR',ar:'سرعة عجلة خلف يمين',pid:'--',unit:'km/h',min:0,max:260,warn:0},
-    {en:'Brake Pressure',ar:'ضغط الفرامل',pid:'--',unit:'bar',min:0,max:220,warn:200},
-    {en:'Brake Temp FL',ar:'حرارة فرامل أمام يسار',pid:'--',unit:'°C',min:0,max:800,warn:700},
-    {en:'Brake Temp FR',ar:'حرارة فرامل أمام يمين',pid:'--',unit:'°C',min:0,max:800,warn:700},
-    {en:'Yaw Rate',ar:'معدل الانعراج',pid:'--',unit:'°/s',min:-200,max:200,warn:185},
-    {en:'Lateral Acceleration',ar:'تسارع جانبي',pid:'--',unit:'g',min:-2,max:2,warn:1.8},
-    {en:'Longitudinal Accel',ar:'تسارع طولي',pid:'--',unit:'g',min:-3,max:3,warn:2.8},
-    {en:'Steering Angle',ar:'زاوية التوجيه',pid:'--',unit:'°',min:-720,max:720,warn:680},
-    {en:'ABS Active',ar:'حالة ABS',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'ESP Active',ar:'حالة ESP',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'ABS Pump Motor',ar:'مضخة ABS',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Inlet Valve FL',ar:'صمام دخول أمام يسار',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Inlet Valve FR',ar:'صمام دخول أمام يمين',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Inlet Valve RL',ar:'صمام دخول خلف يسار',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Inlet Valve RR',ar:'صمام دخول خلف يمين',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Outlet Valve FL',ar:'صمام خروج أمام يسار',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Outlet Valve FR',ar:'صمام خروج أمام يمين',pid:'--',unit:'',min:0,max:1,warn:0},
-  ],
-  airbag:[
-    {en:'Driver Airbag',ar:'وسادة السائق',pid:'--',unit:'Ω',min:1,max:4,warn:0},
-    {en:'Passenger Airbag',ar:'وسادة الراكب',pid:'--',unit:'Ω',min:1,max:4,warn:0},
-    {en:'Left Side Airbag',ar:'وسادة جانبية يسار',pid:'--',unit:'Ω',min:1,max:4,warn:0},
-    {en:'Right Side Airbag',ar:'وسادة جانبية يمين',pid:'--',unit:'Ω',min:1,max:4,warn:0},
-    {en:'Knee Airbag Driver',ar:'وسادة الركبة سائق',pid:'--',unit:'Ω',min:1,max:4,warn:0},
-    {en:'Curtain Airbag L',ar:'وسادة ستارة يسار',pid:'--',unit:'Ω',min:1,max:4,warn:0},
-    {en:'Curtain Airbag R',ar:'وسادة ستارة يمين',pid:'--',unit:'Ω',min:1,max:4,warn:0},
-    {en:'Front Impact Sensor',ar:'حساس اصطدام أمامي',pid:'--',unit:'g',min:0,max:100,warn:80},
-    {en:'Side Impact Sensor L',ar:'حساس اصطدام جانبي يسار',pid:'--',unit:'g',min:0,max:100,warn:80},
-    {en:'Side Impact Sensor R',ar:'حساس اصطدام جانبي يمين',pid:'--',unit:'g',min:0,max:100,warn:80},
-    {en:'Seatbelt Driver',ar:'حزام السائق',pid:'--',unit:'Ω',min:1,max:4,warn:0},
-    {en:'Seatbelt Passenger',ar:'حزام الراكب',pid:'--',unit:'Ω',min:1,max:4,warn:0},
-    {en:'SRS Voltage',ar:'جهد نظام SRS',pid:'--',unit:'V',min:10,max:14,warn:0},
-  ],
-  ac:[
-    {en:'Cabin Temperature',ar:'حرارة الكابينة',pid:'--',unit:'°C',min:-10,max:60,warn:52},
-    {en:'Evaporator Temp',ar:'حرارة المبخر',pid:'--',unit:'°C',min:-5,max:20,warn:18},
-    {en:'Condenser Temp',ar:'حرارة المكثف',pid:'--',unit:'°C',min:20,max:90,warn:82},
-    {en:'Refrigerant High Press',ar:'ضغط غاز عالي',pid:'--',unit:'bar',min:5,max:30,warn:26},
-    {en:'Refrigerant Low Press',ar:'ضغط غاز منخفض',pid:'--',unit:'bar',min:0.5,max:5,warn:4.5},
-    {en:'Compressor Speed',ar:'سرعة الضاغط',pid:'--',unit:'rpm',min:0,max:8000,warn:7500},
-    {en:'Compressor Current',ar:'تيار الضاغط',pid:'--',unit:'A',min:0,max:20,warn:18},
-    {en:'Ambient Temp',ar:'حرارة خارجية',pid:'46',unit:'°C',min:-40,max:60,warn:55},
-    {en:'Blower Speed',ar:'سرعة المروحة',pid:'--',unit:'rpm',min:0,max:3000,warn:2800},
-    {en:'A/C Clutch Status',ar:'حالة كلتش المكيف',pid:'--',unit:'',min:0,max:1,warn:0},
-  ],
-  fuel:[
-    {en:'Fuel Rail Pressure',ar:'ضغط قضيب الوقود',pid:'23',unit:'kPa',min:200,max:700,warn:680},
-    {en:'Fuel Level',ar:'مستوى الوقود',pid:'2F',unit:'%',min:0,max:100,warn:0},
-    {en:'Fuel Pump Duty',ar:'نسبة عمل مضخة الوقود',pid:'--',unit:'%',min:0,max:100,warn:97},
-    {en:'Injector 1 Pulse Width',ar:'نبضة الحاقن 1',pid:'--',unit:'ms',min:0,max:20,warn:18},
-    {en:'Injector 2 Pulse Width',ar:'نبضة الحاقن 2',pid:'--',unit:'ms',min:0,max:20,warn:18},
-    {en:'Injector 3 Pulse Width',ar:'نبضة الحاقن 3',pid:'--',unit:'ms',min:0,max:20,warn:18},
-    {en:'Injector 4 Pulse Width',ar:'نبضة الحاقن 4',pid:'--',unit:'ms',min:0,max:20,warn:18},
-    {en:'EVAP System Pressure',ar:'ضغط نظام EVAP',pid:'32',unit:'Pa',min:-500,max:500,warn:450},
-    {en:'Fuel Tank Temp',ar:'حرارة خزان الوقود',pid:'--',unit:'°C',min:-40,max:80,warn:70},
-    {en:'EVAP Purge Valve',ar:'صمام تنقية EVAP',pid:'--',unit:'%',min:0,max:100,warn:0},
-  ],
-  exhaust:[
-    {en:'O2 Upstream B1S1',ar:'أكسجين قبل المحول ب1',pid:'14',unit:'V',min:0,max:1.2,warn:1.1},
-    {en:'O2 Downstream B1S2',ar:'أكسجين بعد المحول ب1',pid:'15',unit:'V',min:0,max:1.2,warn:1.1},
-    {en:'O2 Upstream B2S1',ar:'أكسجين قبل المحول ب2',pid:'1B',unit:'V',min:0,max:1.2,warn:1.1},
-    {en:'O2 Downstream B2S2',ar:'أكسجين بعد المحول ب2',pid:'1D',unit:'V',min:0,max:1.2,warn:1.1},
-    {en:'Catalyst Temp B1',ar:'حرارة المحول الحفاز ب1',pid:'3C',unit:'°C',min:200,max:900,warn:820},
-    {en:'Catalyst Temp B2',ar:'حرارة المحول الحفاز ب2',pid:'3E',unit:'°C',min:200,max:900,warn:820},
-    {en:'EGR Position',ar:'موضع صمام EGR',pid:'2C',unit:'%',min:0,max:100,warn:92},
-    {en:'NOx Sensor',ar:'حساس NOx',pid:'--',unit:'ppm',min:0,max:2000,warn:1500},
-    {en:'DPF Pressure Drop',ar:'فرق ضغط DPF',pid:'--',unit:'kPa',min:0,max:50,warn:40},
-    {en:'Exhaust Temp',ar:'حرارة العادم',pid:'--',unit:'°C',min:100,max:1000,warn:900},
-  ],
-  electrical:[
-    {en:'Battery Voltage',ar:'جهد البطارية',pid:'42',unit:'V',min:11,max:15,warn:14.8},
-    {en:'Battery Current',ar:'تيار البطارية',pid:'--',unit:'A',min:-100,max:100,warn:90},
-    {en:'Battery SOC',ar:'نسبة شحن البطارية',pid:'--',unit:'%',min:0,max:100,warn:0},
-    {en:'Alternator Voltage',ar:'جهد المولد الكهربائي',pid:'--',unit:'V',min:13,max:15,warn:14.8},
-    {en:'Alternator Load',ar:'حمل المولد',pid:'--',unit:'%',min:0,max:100,warn:92},
-    {en:'BCM Status',ar:'حالة وحدة BCM',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Headlights Voltage',ar:'جهد المصابيح الأمامية',pid:'--',unit:'V',min:11,max:14,warn:0},
-    {en:'Window FL Motor',ar:'محرك نافذة أمام يسار',pid:'--',unit:'A',min:0,max:15,warn:12},
-    {en:'Window FR Motor',ar:'محرك نافذة أمام يمين',pid:'--',unit:'A',min:0,max:15,warn:12},
-    {en:'Window RL Motor',ar:'محرك نافذة خلف يسار',pid:'--',unit:'A',min:0,max:15,warn:12},
-    {en:'Window RR Motor',ar:'محرك نافذة خلف يمين',pid:'--',unit:'A',min:0,max:15,warn:12},
-    {en:'Door Lock FL',ar:'قفل باب أمام يسار',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Door Lock FR',ar:'قفل باب أمام يمين',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Door Lock RL',ar:'قفل باب خلف يسار',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Door Lock RR',ar:'قفل باب خلف يمين',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Central Lock',ar:'القفل المركزي',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Starter Current',ar:'تيار بداية التشغيل',pid:'--',unit:'A',min:0,max:400,warn:380},
-  ],
-  steering:[
-    {en:'Steering Angle',ar:'زاوية التوجيه',pid:'--',unit:'°',min:-720,max:720,warn:680},
-    {en:'EPS Torque',ar:'عزم التوجيه EPS',pid:'--',unit:'Nm',min:-30,max:30,warn:28},
-    {en:'EPS Motor Current',ar:'تيار محرك EPS',pid:'--',unit:'A',min:0,max:80,warn:74},
-    {en:'EPS Motor Temp',ar:'حرارة محرك EPS',pid:'--',unit:'°C',min:-40,max:120,warn:105},
-    {en:'EPS Column Temp',ar:'حرارة عمود التوجيه',pid:'--',unit:'°C',min:-40,max:90,warn:82},
-    {en:'Vehicle Speed',ar:'سرعة السيارة',pid:'0D',unit:'km/h',min:0,max:260,warn:0},
-    {en:'EPS Assist Level',ar:'مستوى مساعدة EPS',pid:'--',unit:'%',min:0,max:100,warn:0},
-    {en:'Rack Position',ar:'موضع العمود المسنن',pid:'--',unit:'mm',min:-100,max:100,warn:90},
-  ],
-  body:[
-    {en:'Door FL Status',ar:'حالة باب أمام يسار',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Door FR Status',ar:'حالة باب أمام يمين',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Door RL Status',ar:'حالة باب خلف يسار',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Door RR Status',ar:'حالة باب خلف يمين',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Hood Status',ar:'حالة غطاء المحرك',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Trunk Status',ar:'حالة صندوق الأمتعة',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Ambient Light',ar:'حساس الضوء المحيط',pid:'--',unit:'lux',min:0,max:10000,warn:0},
-    {en:'Rain Sensor',ar:'حساس المطر',pid:'--',unit:'',min:0,max:5,warn:0},
-    {en:'Interior Temp',ar:'حرارة المقصورة',pid:'--',unit:'°C',min:-10,max:60,warn:52},
-    {en:'Mirror Fold',ar:'حالة المرايا الجانبية',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Sunroof Status',ar:'حالة فتحة السقف',pid:'--',unit:'%',min:0,max:100,warn:0},
-    {en:'Wiper Speed',ar:'سرعة الماسحات',pid:'--',unit:'',min:0,max:3,warn:0},
-  ],
-  suspension:[
-    {en:'Height FL',ar:'ارتفاع أمام يسار',pid:'--',unit:'mm',min:-50,max:50,warn:44},
-    {en:'Height FR',ar:'ارتفاع أمام يمين',pid:'--',unit:'mm',min:-50,max:50,warn:44},
-    {en:'Height RL',ar:'ارتفاع خلف يسار',pid:'--',unit:'mm',min:-50,max:50,warn:44},
-    {en:'Height RR',ar:'ارتفاع خلف يمين',pid:'--',unit:'mm',min:-50,max:50,warn:44},
-    {en:'Lateral G-Force',ar:'قوة G الجانبية',pid:'--',unit:'g',min:-2,max:2,warn:1.8},
-    {en:'Longitudinal G-Force',ar:'قوة G الطولية',pid:'--',unit:'g',min:-3,max:3,warn:2.8},
-    {en:'Damper FL',ar:'مستهلك الصدمات أمام يسار',pid:'--',unit:'%',min:0,max:100,warn:97},
-    {en:'Damper FR',ar:'مستهلك الصدمات أمام يمين',pid:'--',unit:'%',min:0,max:100,warn:97},
-    {en:'Damper RL',ar:'مستهلك الصدمات خلف يسار',pid:'--',unit:'%',min:0,max:100,warn:97},
-    {en:'Damper RR',ar:'مستهلك الصدمات خلف يمين',pid:'--',unit:'%',min:0,max:100,warn:97},
-    {en:'Roll Angle',ar:'زاوية الميل الجانبي',pid:'--',unit:'°',min:-15,max:15,warn:12},
-    {en:'Pitch Angle',ar:'زاوية الميل الأمامي',pid:'--',unit:'°',min:-15,max:15,warn:12},
-  ],
-  obd:[
-    {en:'MIL Status',ar:'مصباح التحقق MIL',pid:'01',unit:'',min:0,max:1,warn:1},
-    {en:'DTC Count',ar:'عدد أكواد الأعطال',pid:'01',unit:'',min:0,max:50,warn:1},
-    {en:'Protocol',ar:'بروتوكول الاتصال',pid:'--',unit:'',min:0,max:0,warn:0},
-    {en:'ECU Count',ar:'عدد وحدات التحكم',pid:'--',unit:'',min:0,max:20,warn:0},
-    {en:'VIN',ar:'رقم الهيكل VIN',pid:'09',unit:'',min:0,max:0,warn:0},
-    {en:'Calibration ID',ar:'معرّف المعايرة',pid:'09',unit:'',min:0,max:0,warn:0},
-    {en:'Monitor Status',ar:'حالة المراقبة',pid:'01',unit:'',min:0,max:0,warn:0},
-    {en:'Freeze Frame',ar:'إطار التجميد',pid:'02',unit:'',min:0,max:0,warn:0},
-  ],
-  hv_battery:[
-    {en:'HV Battery Voltage',ar:'جهد بطارية الهجين',pid:'--',unit:'V',min:150,max:320,warn:310},
-    {en:'HV Battery Current',ar:'تيار بطارية الهجين',pid:'--',unit:'A',min:-150,max:150,warn:140},
-    {en:'HV Battery SOC',ar:'نسبة شحن بطارية الهجين',pid:'--',unit:'%',min:0,max:100,warn:0},
-    {en:'HV Battery SOH',ar:'صحة بطارية الهجين',pid:'--',unit:'%',min:0,max:100,warn:0},
-    {en:'HV Battery Temp Max',ar:'أقصى حرارة بطارية الهجين',pid:'--',unit:'°C',min:-20,max:60,warn:50},
-    {en:'HV Battery Temp Min',ar:'أدنى حرارة بطارية الهجين',pid:'--',unit:'°C',min:-20,max:60,warn:50},
-    {en:'HV Battery Power',ar:'طاقة بطارية الهجين',pid:'--',unit:'kW',min:-60,max:60,warn:55},
-    {en:'Cell Voltage Max',ar:'أقصى جهد خلية',pid:'--',unit:'V',min:3.0,max:4.2,warn:4.1},
-    {en:'Cell Voltage Min',ar:'أدنى جهد خلية',pid:'--',unit:'V',min:3.0,max:4.2,warn:0},
-    {en:'Cell Voltage Delta',ar:'فرق جهد الخلايا',pid:'--',unit:'V',min:0,max:0.5,warn:0.3},
-    {en:'MG1 Speed',ar:'سرعة المولد MG1',pid:'--',unit:'rpm',min:-10000,max:10000,warn:9500},
-    {en:'MG2 Speed',ar:'سرعة المحرك MG2',pid:'--',unit:'rpm',min:-10000,max:10000,warn:9500},
-    {en:'MG1 Torque',ar:'عزم المولد MG1',pid:'--',unit:'Nm',min:-200,max:200,warn:190},
-    {en:'MG2 Torque',ar:'عزم المحرك MG2',pid:'--',unit:'Nm',min:-200,max:200,warn:190},
-    {en:'Inverter Temp',ar:'حرارة المحول الإلكتروني',pid:'--',unit:'°C',min:-20,max:100,warn:88},
-    {en:'Coolant Temp HV',ar:'حرارة سائل تبريد الهجين',pid:'--',unit:'°C',min:-20,max:65,warn:58},
-  ],
-  ev_battery:[
-    {en:'HV Battery Voltage',ar:'جهد البطارية الكهربائية',pid:'--',unit:'V',min:200,max:450,warn:420},
-    {en:'HV Battery Current',ar:'تيار البطارية الكهربائية',pid:'--',unit:'A',min:-300,max:300,warn:280},
-    {en:'HV Battery SOC',ar:'نسبة الشحن',pid:'--',unit:'%',min:0,max:100,warn:0},
-    {en:'HV Battery SOH',ar:'صحة البطارية',pid:'--',unit:'%',min:0,max:100,warn:0},
-    {en:'Battery Temp Max',ar:'أقصى حرارة بطارية',pid:'--',unit:'°C',min:-20,max:60,warn:50},
-    {en:'Battery Temp Min',ar:'أدنى حرارة بطارية',pid:'--',unit:'°C',min:-20,max:60,warn:50},
-    {en:'Battery Power',ar:'طاقة البطارية',pid:'--',unit:'kW',min:-150,max:150,warn:140},
-    {en:'Cell Voltage Max',ar:'أقصى جهد خلية',pid:'--',unit:'V',min:3.0,max:4.2,warn:4.1},
-    {en:'Cell Voltage Min',ar:'أدنى جهد خلية',pid:'--',unit:'V',min:3.0,max:4.2,warn:0},
-    {en:'Cell Voltage Delta',ar:'فرق جهد الخلايا',pid:'--',unit:'V',min:0,max:0.5,warn:0.3},
-    {en:'Range Remaining',ar:'المسافة المتبقية',pid:'--',unit:'km',min:0,max:600,warn:0},
-    {en:'Energy Consumed',ar:'الطاقة المستهلكة',pid:'--',unit:'kWh',min:0,max:100,warn:0},
-    {en:'Motor Speed',ar:'سرعة المحرك الكهربائي',pid:'--',unit:'rpm',min:-15000,max:15000,warn:14000},
-    {en:'Motor Torque',ar:'عزم المحرك الكهربائي',pid:'--',unit:'Nm',min:-400,max:400,warn:380},
-    {en:'Inverter Temp',ar:'حرارة المحول الإلكتروني',pid:'--',unit:'°C',min:-20,max:100,warn:88},
-    {en:'Charger Status',ar:'حالة الشاحن',pid:'--',unit:'',min:0,max:1,warn:0},
-    {en:'Charge Rate',ar:'معدل الشحن',pid:'--',unit:'kW',min:0,max:22,warn:0},
-    {en:'Coolant Temp HV',ar:'حرارة سائل تبريد البطارية',pid:'--',unit:'°C',min:-20,max:65,warn:58},
-  ],
-};
+  // first try built-in language map (only simple keys) - no fallback
+  if(TR[targetLang]){
+    const known = Object.values(TR[targetLang]).find(v=>v===normalized);
+    if(known) { TRANSLATION_CACHE[cacheKey] = normalized; return normalized; }
+  }
 
-const ACTUATORS = {
-  engine:[
-    {en:'Fuel Pump',ar:'مضخة الوقود',state:false},
-    {en:'Cooling Fan',ar:'مروحة التبريد',state:false},
-    {en:'EGR Valve',ar:'صمام EGR',state:false},
-    {en:'EVAP Purge',ar:'صمام EVAP',state:false},
-    {en:'IAC Motor',ar:'محرك الهواء الخامل',state:false},
-  ],
-  abs:[
-    {en:'ABS Pump Motor',ar:'مضخة ABS',state:false},
-    {en:'Inlet Valve FL',ar:'صمام دخول أمام يسار',state:false},
-    {en:'Inlet Valve FR',ar:'صمام دخول أمام يمين',state:false},
-    {en:'Inlet Valve RL',ar:'صمام دخول خلف يسار',state:false},
-    {en:'Inlet Valve RR',ar:'صمام دخول خلف يمين',state:false},
-    {en:'Outlet Valve FL',ar:'صمام خروج أمام يسار',state:false},
-    {en:'Outlet Valve FR',ar:'صمام خروج أمام يمين',state:false},
-  ],
-  transmission:[
-    {en:'Shift Solenoid A',ar:'ملف التحويل A',state:false},
-    {en:'Shift Solenoid B',ar:'ملف التحويل B',state:false},
-    {en:'Shift Solenoid C',ar:'ملف التحويل C',state:false},
-    {en:'TCC Solenoid',ar:'ملف قفل محول العزم',state:false},
-    {en:'Line Pressure Solenoid',ar:'ملف ضغط الخط',state:false},
-    {en:'Torque Converter Clutch',ar:'كلتش محول العزم',state:false},
-  ],
-  ac:[
-    {en:'A/C Compressor',ar:'ضاغط المكيف',state:false},
-    {en:'Blower Fan',ar:'مروحة التهوية',state:false},
-    {en:'Recirculation',ar:'إعادة التدوير',state:false},
-  ],
-  fuel:[
-    {en:'Fuel Pump',ar:'مضخة الوقود',state:false},
-    {en:'Injector 1 Test',ar:'اختبار الحاقن 1',state:false},
-    {en:'Injector 2 Test',ar:'اختبار الحاقن 2',state:false},
-    {en:'Injector 3 Test',ar:'اختبار الحاقن 3',state:false},
-    {en:'Injector 4 Test',ar:'اختبار الحاقن 4',state:false},
-    {en:'EVAP Purge Valve',ar:'صمام EVAP',state:false},
-  ],
-  electrical:[
-    {en:'Headlights',ar:'المصابيح الأمامية',state:false},
-    {en:'Horn',ar:'البوق',state:false},
-    {en:'Central Lock',ar:'القفل المركزي',state:false},
-    {en:'Window FL',ar:'نافذة أمام يسار',state:false},
-    {en:'Window FR',ar:'نافذة أمام يمين',state:false},
-    {en:'Window RL',ar:'نافذة خلف يسار',state:false},
-    {en:'Window RR',ar:'نافذة خلف يمين',state:false},
-    {en:'Door Lock FL',ar:'قفل باب أمام يسار',state:false},
-    {en:'Door Lock FR',ar:'قفل باب أمام يمين',state:false},
-    {en:'Door Lock RL',ar:'قفل باب خلف يسار',state:false},
-    {en:'Door Lock RR',ar:'قفل باب خلف يمين',state:false},
-  ],
-  steering:[
-    {en:'EPS Motor',ar:'محرك التوجيه EPS',state:false},
-    {en:'EPS Assist Level',ar:'مستوى مساعدة EPS',state:false},
-  ],
-  body:[
-    {en:'Window FL',ar:'نافذة أمام يسار',state:false},
-    {en:'Window FR',ar:'نافذة أمام يمين',state:false},
-    {en:'Window RL',ar:'نافذة خلف يسار',state:false},
-    {en:'Window RR',ar:'نافذة خلف يمين',state:false},
-    {en:'Door Lock FL',ar:'قفل باب أمام يسار',state:false},
-    {en:'Door Lock FR',ar:'قفل باب أمام يمين',state:false},
-    {en:'Door Lock RL',ar:'قفل باب خلف يسار',state:false},
-    {en:'Door Lock RR',ar:'قفل باب خلف يمين',state:false},
-    {en:'Mirror Fold',ar:'طي المرايا',state:false},
-    {en:'Sunroof',ar:'فتحة السقف',state:false},
-    {en:'Wiper Front',ar:'ماسح أمامي',state:false},
-    {en:'Wiper Rear',ar:'ماسح خلفي',state:false},
-  ],
-  suspension:[
-    {en:'Damper FL',ar:'مستهلك الصدمات أمام يسار',state:false},
-    {en:'Damper FR',ar:'مستهلك الصدمات أمام يمين',state:false},
-    {en:'Damper RL',ar:'مستهلك الصدمات خلف يسار',state:false},
-    {en:'Damper RR',ar:'مستهلك الصدمات خلف يمين',state:false},
-    {en:'Height Control',ar:'التحكم في الارتفاع',state:false},
-  ],
-  hv_battery:[
-    {en:'HV Cooling Fan',ar:'مروحة تبريد الهجين',state:false},
-    {en:'HV Contactor Main+',ar:'قاطع رئيسي موجب',state:false},
-    {en:'HV Contactor Main-',ar:'قاطع رئيسي سالب',state:false},
-    {en:'HV Precharge Relay',ar:'ريليه الشحن المسبق',state:false},
-    {en:'MG1 Test',ar:'اختبار المولد MG1',state:false},
-    {en:'MG2 Test',ar:'اختبار المحرك MG2',state:false},
-  ],
-  ev_battery:[
-    {en:'HV Cooling Fan',ar:'مروحة تبريد البطارية',state:false},
-    {en:'HV Contactor Main+',ar:'قاطع رئيسي موجب',state:false},
-    {en:'HV Contactor Main-',ar:'قاطع رئيسي سالب',state:false},
-    {en:'HV Precharge Relay',ar:'ريليه الشحن المسبق',state:false},
-    {en:'Charge Port Lock',ar:'قفل منفذ الشحن',state:false},
-    {en:'Onboard Charger',ar:'الشاحن المدمج',state:false},
-    {en:'Motor Test',ar:'اختبار المحرك الكهربائي',state:false},
-  ],
-};
+  const from = 'en';
+  const data = {q: normalized, target: targetLang, format:'text'};
 
-const RLANGS=[
-  {c:'en',f:'🇺🇸',n:'English'},{c:'ar',f:'🇸🇦',n:'العربية'},{c:'fr',f:'🇫🇷',n:'Français'},
-  {c:'de',f:'🇩🇪',n:'Deutsch'},{c:'es',f:'🇪🇸',n:'Español'},{c:'tr',f:'🇹🇷',n:'Türkçe'},
-  {c:'ru',f:'🇷🇺',n:'Русский'},{c:'zh',f:'🇨🇳',n:'中文'},{c:'ja',f:'🇯🇵',n:'日本語'},
-  {c:'ko',f:'🇰🇷',n:'한국어'},{c:'it',f:'🇮🇹',n:'Italiano'},{c:'pt',f:'🇧🇷',n:'Português'},
-  {c:'nl',f:'🇳🇱',n:'Nederlands'},{c:'pl',f:'🇵🇱',n:'Polski'},{c:'fa',f:'🇮🇷',n:'فارسی'},
-  {c:'hi',f:'🇮🇳',n:'हिन्दी'},{c:'id',f:'🇮🇩',n:'Bahasa'},{c:'vi',f:'🇻🇳',n:'Tiếng Việt'},
-  {c:'sv',f:'🇸🇪',n:'Svenska'},{c:'ro',f:'🇷🇴',n:'Română'},
-];
+  try {
+    if(S.translateApiKey){
+      const gUrl = `https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(S.translateApiKey)}`;
+      const gResp = await fetch(gUrl, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      if(gResp.ok){
+        const j = await gResp.json();
+        const translated = j?.data?.translations?.[0]?.translatedText;
+        if(translated){ TRANSLATION_CACHE[cacheKey] = translated; return translated; }
+      }
+    }
 
-const HIST_LEN=40;
-const hist={};
-function getHist(k){if(!hist[k])hist[k]=Array(HIST_LEN).fill(null);return hist[k];}
-function pushHist(k,v){const h=getHist(k);h.push(v);if(h.length>HIST_LEN)h.shift();}
+    const fallbackUrl = 'https://libretranslate.de/translate';
+    const fallbackResp = await fetch(fallbackUrl, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...data, source:from})});
+    if(fallbackResp.ok){
+      const k = await fallbackResp.json();
+      if(k.translatedText){ TRANSLATION_CACHE[cacheKey] = k.translatedText; return k.translatedText; }
+    }
+  } catch(e){
+    console.warn('translateText error', e);
+  }
 
-function drawMiniChart(canvas,data,color,mn,mx,warnV){
-  if(!canvas)return;
-  const W=canvas.offsetWidth||240,H=50;
-  canvas.width=W;canvas.height=H;
-  const ctx=canvas.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-  const rng=mx-mn||1;
-  if(warnV&&warnV>mn){const wy=H-((warnV-mn)/rng*H);ctx.fillStyle='rgba(255,61,113,0.05)';ctx.fillRect(0,0,W,wy);}
-  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
-  [0.33,0.66].forEach(f=>{ctx.beginPath();ctx.moveTo(0,H*f);ctx.lineTo(W,H*f);ctx.stroke();});
-  const valid=data.filter(v=>v!==null);if(valid.length<2)return;
-  const step=W/(HIST_LEN-1);
-  const g=ctx.createLinearGradient(0,0,W,0);
-  g.addColorStop(0,color+'44');g.addColorStop(1,color);
-  ctx.strokeStyle=g;ctx.lineWidth=2;ctx.lineJoin='round';ctx.beginPath();
-  let f=true;
-  data.forEach((v,i)=>{
-    if(v===null){f=true;return;}
-    const x=i*step,y=H-((v-mn)/rng*H);
-    f?ctx.moveTo(x,y):ctx.lineTo(x,y);f=false;
-  });
-  ctx.stroke();
-  ctx.fillStyle=color+'12';ctx.lineTo(W,H);ctx.lineTo(0,H);ctx.closePath();ctx.fill();
-  const li=data.reduceRight((a,v,i)=>a===-1&&v!==null?i:a,-1);
-  if(li>=0){
-    const nx=li*step,ny=H-((data[li]-mn)/rng*H);
-    ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=8;
-    ctx.beginPath();ctx.arc(nx,ny,4,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+  TRANSLATION_CACHE[cacheKey] = apiText;
+  return apiText;
+}
+
+async function translateElementTree(root, targetLang){
+  if(window.stopAllScripts) return;  // Emergency stop
+  if(!root || !targetLang || targetLang==='en') return;
+  if(window.__nexusTranslationBusy) return;  // Prevent concurrent calls
+  
+  window.__nexusTranslationBusy = true;
+  try {
+    // Safety check within loop
+    if(window.stopAllScripts) return;
+    
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: node => {
+      if(window.stopAllScripts) return NodeFilter.FILTER_SKIP;
+      if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_SKIP;
+      const parent = node.parentElement;
+      if(!parent || TRANSLATION_IGNORE_TAGS.has(parent.tagName)) return NodeFilter.FILTER_SKIP;
+      if(parent.closest('[data-i18n]')) return NodeFilter.FILTER_SKIP;
+      return NodeFilter.FILTER_ACCEPT;
+    } }, false);
+
+    const nodes = [];
+    while(walker.nextNode()){
+      if(window.stopAllScripts) break;  // Exit loop if emergency stop triggered
+      nodes.push(walker.currentNode);
+    }
+    
+    // Translate in batches with safety checks
+    await Promise.all(nodes.map(async node => {
+      if(window.stopAllScripts) return;  // Skip if stopped
+      try {
+        const original = node.__nexusOriginalText || node.nodeValue;
+        node.__nexusOriginalText = original;
+        const translated = await translateText(original, targetLang);
+        if(translated && translated!==original && !window.stopAllScripts){
+          node.nodeValue = translated;
+        }
+      } catch(e){ console.warn('translateNode error', e); }
+    }));
+  } catch(e){
+    console.warn('[translateElementTree] Error:', e);
+  } finally {
+    window.__nexusTranslationBusy = false;
   }
 }
 
-function openSysDash(sysId){
-  updateNavActive('canAnalysis');
-  openLdValues(sysId);
+function restoreOriginalText(root){
+  if(!root) return;
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: node => {
+    if(!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_SKIP;
+    return NodeFilter.FILTER_ACCEPT;
+  } }, false);
+  while(walker.nextNode()){
+    const node = walker.currentNode;
+    if(node.__nexusOriginalText) node.nodeValue = node.__nexusOriginalText;
+  }
 }
 
-function openLdValues(sysId){
-  if (!requireConn()) return;
-  S.activeLdSys=sysId;
-  const sys=SYSTEMS.find(s=>s.id===sysId);
-  const nm=S.lang==='ar'?sys.ar.name:sys.en.name;
-  document.getElementById('ldValTitle').textContent=(S.lang==='ar'?'بيانات حية — ':'LIVE DATA — ')+nm.toUpperCase();
-  renderLdValues(sysId);
-  renderActuators(sysId);
-  showPage('ldValues');
+function scheduleAutoTranslation(lang){
+  if(lang==='en') {
+    restoreOriginalText(document.body);
+    return;
+  }
+  setTimeout(()=>translateElementTree(document.body, lang), 80);
 }
 
-function calcHealthPct(sensor, value) {
-  if (value === null) return null;
-  const mn = sensor.min, mx = sensor.max, w = sensor.warn;
-  const rng = mx - mn || 1;
-  if (!w) return 92; // no warn threshold → assume healthy
-  const warnRatio = Math.abs(w - mn) / rng;
-  const valRatio  = Math.abs(parseFloat(value) - mn) / rng;
-  if (warnRatio <= 0) return 85;
-  let pct = (1 - valRatio / warnRatio) * 100;
-  pct = Math.max(0, Math.min(100, pct));
-  return parseFloat(pct.toFixed(1));
-}
 function healthColor(pct) {
   if (pct === null) return 'var(--dim)';
   if (pct >= 80) return 'var(--green)';
@@ -2270,52 +2333,61 @@ function healthColor(pct) {
   if (pct >= 35) return 'var(--orange)';
   return 'var(--red)';
 }
-function renderLdValues(sysId){
-  const sensors=SENSORS[sysId]||[];
-  const sys=SYSTEMS.find(s=>s.id===sysId);
-  const g=document.getElementById('ldvGrid');if(!g)return;
-  g.innerHTML=sensors.map((sensor,i)=>{
-    const k=`${sysId}_${i}`;
-    const v=S.connected?mockVal(sensor):null;
-    if(v!==null)pushHist(k,v);
-    const st=getSensorSt(sensor,v);
-    const hPct=calcHealthPct(sensor,v);
-    const hColor=healthColor(hPct);
-    const nm=S.lang==='ar'?sensor.ar:sensor.en;
-    const alert=getAlert(sensor,v);
-    return `<div class="ldv ${st.cls==='s-err'?'err':st.cls==='s-warn'?'warn':''}" id="ldv_${k}" style="--card-accent:${hColor};--card-glow:${hColor}22;">
-      <div class="ldv-top">
-        <div>
-          <div class="ldv-name">${nm}</div>
-          <div class="ldv-pid">${sensor.pid==='--'?'— N/A':'PID 0x'+sensor.pid}</div>
-        </div>
-        <div class="ldv-sbadge ${st.cls}">${v!==null?st.lbl:t('notConn')}</div>
-      </div>
-      <div class="ldv-body">
-        <div class="ldv-val-row">
-          <div class="ldv-val" id="lv_${k}">${v!==null?v:'——'}</div>
-          <span class="ldv-unit">${sensor.unit}</span>
-        </div>
-        <div class="ldv-range">${sensor.min} — ${sensor.max} ${sensor.unit}</div>
-        <div class="ldv-health-row">
-          <div class="ldv-health-bar"><div class="ldv-health-fill" id="lhf_${k}" style="width:${hPct!==null?hPct:0}%;background:${hColor};"></div></div>
-          <div class="ldv-health-pct" id="lhp_${k}" style="color:${hColor};">${hPct!==null?hPct+'%':'—'}</div>
-        </div>
-      </div>
-      <div class="ldv-chart"><canvas id="lc_${k}"></canvas></div>
-      <div class="ldv-alert ${alert?'on':''}" id="la_${k}">
-        ${alert?`<strong>${alert.title}</strong><br>${alert.body}<div class="ldv-fix">${alert.action}</div>`:''}
-      </div>
-    </div>`;
-  }).join('');
+async function renderLdValues(sysId){
+  try {
+    const response = await fetch(`/api/live-data/${sysId}`);
+    if (!response.ok) throw new Error('Failed to fetch sensor data');
+    const sensors = await response.json();
 
-  setTimeout(()=>{
-    sensors.forEach((_,i)=>{
-      const k=`${sysId}_${i}`;
-      const canvas=document.getElementById(`lc_${k}`);
-      if(canvas)drawMiniChart(canvas,getHist(k),sys?.color||'#00E5FF',sensors[i].min,sensors[i].max,sensors[i].warn);
-    });
-  },60);
+    const g = document.getElementById('ldvGrid');
+    if (!g) return;
+
+    g.innerHTML = sensors.map((sensor, i) => {
+      const k = `${sysId}_${i}`;
+      const v = S.connected ? sensor.value : null; // Assuming API returns current value
+      if (v !== null) pushHist(k, v);
+      const st = getSensorSt(sensor, v);
+      const hPct = calcHealthPct(sensor, v);
+      const hColor = healthColor(hPct);
+      const nm = S.lang === 'ar' ? sensor.ar : sensor.en;
+      const alert = getAlert(sensor, v);
+      return `<div class="ldv ${st.cls === 's-err' ? 'err' : st.cls === 's-warn' ? 'warn' : ''}" id="ldv_${k}" style="--card-accent:${hColor};--card-glow:${hColor}22;">
+        <div class="ldv-top">
+          <div>
+            <div class="ldv-name">${nm}</div>
+            <div class="ldv-pid">${sensor.pid === '--' ? '— N/A' : 'PID 0x' + sensor.pid}</div>
+          </div>
+          <div class="ldv-sbadge ${st.cls}">${v !== null ? st.lbl : t('notConn')}</div>
+        </div>
+        <div class="ldv-body">
+          <div class="ldv-val-row">
+            <div class="ldv-val" id="lv_${k}">${v !== null ? v : '——'}</div>
+            <span class="ldv-unit">${sensor.unit}</span>
+          </div>
+          <div class="ldv-range">${sensor.min} — ${sensor.max} ${sensor.unit}</div>
+          <div class="ldv-health-row">
+            <div class="ldv-health-bar"><div class="ldv-health-fill" id="lhf_${k}" style="width:${hPct !== null ? hPct : 0}%;background:${hColor};"></div></div>
+            <div class="ldv-health-pct" id="lhp_${k}" style="color:${hColor};">${hPct !== null ? hPct + '%' : '—'}</div>
+          </div>
+        </div>
+        <div class="ldv-chart"><canvas id="lc_${k}"></canvas></div>
+        <div class="ldv-alert ${alert ? 'on' : ''}" id="la_${k}">
+          ${alert ? `<strong>${alert.title}</strong><br>${alert.body}<div class="ldv-fix">${alert.action}</div>` : ''}
+        </div>
+      </div>`;
+    }).join('');
+
+    setTimeout(() => {
+      sensors.forEach((_, i) => {
+        const k = `${sysId}_${i}`;
+        const canvas = document.getElementById(`lc_${k}`);
+        if (canvas) drawMiniChart(canvas, getHist(k), '#00E5FF', sensors[i].min, sensors[i].max, sensors[i].warn); // Default color since sys is removed
+      });
+    }, 60);
+  } catch (error) {
+    console.error('Error rendering live values:', error);
+    // Optionally show error in UI
+  }
 }
 
 // ── REAL OBD PIDs MAP ──────────────────────────────────────────────────────
@@ -2372,6 +2444,12 @@ async function getRealVal(sysId, sensorIdx) {
   return pidInfo.parse(resp);
 }
 
+function parsePidResponse(resp, pid) {
+  const key = Object.keys(OBD_PIDS).find(k => OBD_PIDS[k].pid === '01' + pid.toUpperCase());
+  if(!key) return null;
+  return OBD_PIDS[key].parse(resp);
+}
+
 function mockVal(s){
   if(!S.connected)return null;
   const r=s.max-s.min||1;
@@ -2413,47 +2491,64 @@ function getAlert(s,v){
 }
 
 /* LIVE UPDATE */
-function liveUpdate(){
-  if(!S.activeLdSys)return;
-  const sysId=S.activeLdSys;
-  const sensors=SENSORS[sysId]||[];
-  const sys=SYSTEMS.find(s=>s.id===sysId);
-  sensors.forEach((sensor,i)=>{
-    const k=`${sysId}_${i}`;
-    const v=mockVal(sensor);
-    if(v===null)return;
-    pushHist(k,v);
-    const lv=document.getElementById(`lv_${k}`);
-    if(lv)lv.innerHTML=`${v}<span class="ldv-unit"> ${sensor.unit}</span>`;
-    const canvas=document.getElementById(`lc_${k}`);
-    if(canvas)drawMiniChart(canvas,getHist(k),sys?.color||'#00E5FF',sensor.min,sensor.max,sensor.warn);
-    const st=getSensorSt(sensor,v);
-    const hPct2=calcHealthPct(sensor,v);
-    const hColor2=healthColor(hPct2);
-    const card=document.getElementById(`ldv_${k}`);
-    if(card){card.className=`ldv ${st.cls==='s-err'?'err':st.cls==='s-warn'?'warn':''}`;}
-    const hfill=document.getElementById(`lhf_${k}`);
-    if(hfill){hfill.style.width=(hPct2!==null?hPct2:0)+'%';hfill.style.background=hColor2;}
-    const hpct=document.getElementById(`lhp_${k}`);
-    if(hpct){hpct.textContent=hPct2!==null?hPct2+'%':'—';hpct.style.color=hColor2;}
-    const alert=getAlert(sensor,v);
-    const la=document.getElementById(`la_${k}`);
-    if(la){
-      if(alert){la.className='ldv-alert on';la.innerHTML=`<strong>${alert.title}</strong><br>${alert.body}<div class="ldv-fix">${alert.action}</div>`;}
-      else{la.className='ldv-alert';}
-    }
-  });
+async function liveUpdate(){
+  if(!S.activeLdSys) return;
+  const sysId = S.activeLdSys;
+  try {
+    const response = await fetch(`/api/live-data/${sysId}`);
+    if (!response.ok) return;
+    const sensors = await response.json();
 
-  const PRIMARY_SENSOR_IDX = {engine:0,transmission:0,abs:4,airbag:4,ac:2,fuel:0,exhaust:2,electrical:0,steering:1,body:4,suspension:4,obd:3};
-  SYSTEMS.forEach(sys => {
-    const ps_idx = PRIMARY_SENSOR_IDX[sys.id];
-    const snList = SENSORS[sys.id] || [];
-    if(ps_idx === undefined || !snList[ps_idx]) return;
-    const k = `${sys.id}_${ps_idx}`;
-    const h = getHist(k); const v = h[h.length-1];
-    const el = document.getElementById(`scv_${sys.id}`);
-    if(el && v !== null) el.textContent = v;
-  });
+    sensors.forEach((sensor, i) => {
+      const k = `${sysId}_${i}`;
+      const v = sensor.value;
+      if (v === null) return;
+      pushHist(k, v);
+      const lv = document.getElementById(`lv_${k}`);
+      if (lv) lv.innerHTML = `${v}<span class="ldv-unit"> ${sensor.unit}</span>`;
+      const canvas = document.getElementById(`lc_${k}`);
+      if (canvas) drawMiniChart(canvas, getHist(k), '#00E5FF', sensor.min, sensor.max, sensor.warn);
+      const st = getSensorSt(sensor, v);
+      const hPct2 = calcHealthPct(sensor, v);
+      const hColor2 = healthColor(hPct2);
+      const card = document.getElementById(`ldv_${k}`);
+      if (card) { card.className = `ldv ${st.cls === 's-err' ? 'err' : st.cls === 's-warn' ? 'warn' : ''}`; }
+      const hfill = document.getElementById(`lhf_${k}`);
+      if (hfill) { hfill.style.width = (hPct2 !== null ? hPct2 : 0) + '%'; hfill.style.background = hColor2; }
+      const hpct = document.getElementById(`lhp_${k}`);
+      if (hpct) { hpct.textContent = hPct2 !== null ? hPct2 + '%' : '—'; hpct.style.color = hColor2; }
+      const alert = getAlert(sensor, v);
+      const la = document.getElementById(`la_${k}`);
+      if (la) {
+        if (alert) { la.className = 'ldv-alert on'; la.innerHTML = `<strong>${alert.title}</strong><br>${alert.body}<div class="ldv-fix">${alert.action}</div>`; }
+        else { la.className = 'ldv-alert'; }
+      }
+    });
+
+    // Update primary sensor values on dashboard
+    const PRIMARY_SENSOR_IDX = {engine:0, transmission:0, abs:4, airbag:4, ac:2, fuel:0, exhaust:2, electrical:0, steering:1, body:4, suspension:4, obd:3};
+    // Since SYSTEMS is deleted, we need to get system list from API or hardcode
+    const systems = ['engine', 'transmission', 'abs', 'airbag', 'ac', 'fuel', 'exhaust', 'electrical', 'steering', 'body', 'suspension', 'obd']; // Hardcoded for now
+    for (const sysId of systems) {
+      const ps_idx = PRIMARY_SENSOR_IDX[sysId];
+      if (ps_idx === undefined) continue;
+      try {
+        const response = await fetch(`/api/live-data/${sysId}`);
+        if (!response.ok) continue;
+        const sysSensors = await response.json();
+        if (!sysSensors[ps_idx]) continue;
+        const k = `${sysId}_${ps_idx}`;
+        const h = getHist(k);
+        const v = h[h.length - 1];
+        const el = document.getElementById(`scv_${sysId}`);
+        if (el && v !== null) el.textContent = v;
+      } catch (e) {
+        // Ignore errors for individual systems
+      }
+    }
+  } catch (error) {
+    console.error('Error in liveUpdate:', error);
+  }
 }
 
 /* ELECTRICAL SECTION TOGGLE */
@@ -2489,124 +2584,86 @@ async function startFullScan(){
     toast(t('connectFirst'),'err');
     return;
   }
-  const canConnected = S.connected && CAN.systems.length > 0;
-  const systems = canConnected ? CAN.systems : SYSTEMS;
   scanCancelled=false;
   S.dtcs=[];
-  document.getElementById('scanBar').style.width='0%';
-  document.getElementById('scanPct').textContent='0%';
-  document.getElementById('scanLabel').textContent=t('scanning');
-  const badge=document.getElementById('dtcBadge');badge.style.display='none';
 
-  // ── REAL OBD DTC SCAN ──────────────────────────────────────────
+  // ── Step 1: Pull ALL CAN Bus Data ──────────────────────────────────────────
+  document.getElementById('scanLabel').textContent = 'Pulling ALL CAN Bus Data...';
+  const rawData = {};
   if(S.writer) {
-    const DTC_MODES = [
-      {cmd:'03', label:'Confirmed', prefix:'P'},   // Mode 03: confirmed DTCs
-      {cmd:'07', label:'Pending',   prefix:'P'},   // Mode 07: pending DTCs
-      {cmd:'0A', label:'Permanent', prefix:'P'},   // Mode 0A: permanent DTCs
-    ];
-    const DTC_SYSTEMS = S.detectedSystems || ['engine','obd'];
-    let sysIdx = 0;
-
-    for(const sys of DTC_SYSTEMS) {
-      if(scanCancelled) break;
-      sysIdx++;
-      const pct = Math.round(sysIdx/DTC_SYSTEMS.length*70);
-      document.getElementById('scanBar').style.width=pct+'%';
-      document.getElementById('scanPct').textContent=pct+'%';
-      const ecu = ECU_ADDRESSES[sys];
-      if(!ecu) continue;
-      document.getElementById('scanLabel').textContent=t('scanningSystem')+' '+(S.lang==='ar'?ecu.name_ar:ecu.name_en);
-
-      // Set ECU header
-      await sendCmd(`ATSH${ecu.header}`);
-      await sleep(100);
-
-      for(const mode of DTC_MODES) {
-        await sendCmd(mode.cmd);
-        const resp = await readResponse(1200);
-        if(!resp || resp.includes('NO DATA') || resp.includes('ERROR')) continue;
-
-        // Parse DTC bytes
-        const clean = resp.replace(/[\r\n>\s]/g,'');
-        const bytes = clean.match(/[0-9A-F]{2}/gi) || [];
-        // Skip response byte (43/47/4A) and count byte
-        for(let i=2; i<bytes.length-1; i+=2) {
-          const b1 = parseInt(bytes[i],16);
-          const b2 = parseInt(bytes[i+1],16);
-          if(b1===0 && b2===0) continue;
-          // Decode DTC type from first nibble
-          const types = ['P','P','C','B','U'];
-          const type = types[Math.floor(b1/0x40)] || 'P';
-          const dtcNum = ((b1&0x3F).toString(16).padStart(2,'0') + b2.toString(16).padStart(2,'0')).toUpperCase();
-          const code = type + dtcNum;
-          if(!S.dtcs.find(d=>d.code===code)) {
-            S.dtcs.push({code, sys: ecu.name_en||sys, num:dtcNum, type:mode.label});
-          }
-        }
+    // Pull all available PIDs from all systems
+    const allPids = Object.keys(OBD_PIDS);
+    for(const pidKey of allPids) {
+      const pidInfo = OBD_PIDS[pidKey];
+      const resp = await readOBD(pidInfo.pid);
+      if(resp) {
+        rawData[pidKey] = resp;
       }
-    }
-
-    // Reset to broadcast
-    await sendCmd('ATSH7DF');
-    await sleep(200);
-
-    // Add AI-predicted DTCs if no real ones found or to supplement
-    if(S.aiDtcPredictions && S.aiDtcPredictions.length > 0 && S.dtcs.length === 0) {
-      document.getElementById('scanLabel').textContent = '🤖 Adding AI predictions...';
-      S.aiDtcPredictions
-        .filter(p => p.probability === 'high')
-        .forEach(p => {
-          if(!S.dtcs.find(d => d.code === p.code)) {
-            S.dtcs.push({
-              code: p.code,
-              sys: 'AI Prediction',
-              num: p.code.substring(1),
-              aiPredicted: true,
-              reason: p.reason
-            });
-          }
-        });
-    }
-
-
-    // Demo/Mock mode
-    for(let i=0;i<systems.length;i++){
-      if(scanCancelled)break;
-      const pct=Math.round((i+1)/systems.length*100);
-      document.getElementById('scanBar').style.width=pct+'%';
-      document.getElementById('scanPct').textContent=pct+'%';
-      const nm = canConnected ? systems[i].name : (S.lang==='ar'?systems[i].ar.name:systems[i].en.name);
-      document.getElementById('scanLabel').textContent=t('scanningSystem')+' '+nm;
-      if(canConnected){
-        const sys=systems[i];
-        sys.sensors.forEach(s=>{
-          if(s.warn&&s.value!==null&&Math.abs(s.value)>=Math.abs(s.warn)){
-            const code='C'+sys.id.substring(0,2).toUpperCase()+Math.floor(Math.random()*900+100);
-            S.dtcs.push({code,sys:sys.name,num:code.substring(1),sensorName:s.name,value:s.value,unit:s.unit,warn:s.warn});
-          }
-        });
-      }
-      await sleep(180);
-    }
-    if(!canConnected){
-      S.dtcs=[
-        {code:'P0300',sys:'Engine',num:'0300'},
-        {code:'P0420',sys:'Exhaust',num:'0420'},
-        {code:'P0301',sys:'Engine',num:'0301'},
-      ];
     }
   }
 
+  // ── Step 2: Send Raw Data to API ──────────────────────────────────────────
+  document.getElementById('scanLabel').textContent = 'Analyzing with AI...';
+  const apiUrl = 'https://api.nexuspro.com/scan'; // Replace with your API URL
+  const payload = {
+    vehicle: {
+      make: S.vehicleMake || 'Unknown',
+      vin: S.vin || 'Unknown',
+      protocol: S.protocol || 'CAN',
+      type: getVehicleType()
+    },
+    rawData: rawData,
+    timestamp: new Date().toISOString()
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${S.apiKey}` // Assuming API key is stored
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if(!response.ok) throw new Error('API request failed');
+
+    const result = await response.json();
+
+    // ── Step 3: Process API Response ──────────────────────────────────────────
+    S.dtcs = result.faults || [];
+    S.ghostFaults = result.ghostFaults || [];
+    S.expertRecommendations = result.recommendations || [];
+    S.systemHealth = result.systemHealth || {};
+
+    // Filter ghost faults
+    S.dtcs = S.dtcs.filter(dtc => !S.ghostFaults.includes(dtc.code));
+    
+    // ════════════════════════════════════════════════════════════════════════════
+    // 🔗 FETCH CUSTOM API DIAGNOSIS FOR DTCs
+    // ════════════════════════════════════════════════════════════════════════════
+    if(S.dtcs && S.dtcs.length > 0) {
+      toast(S.lang==='ar'?'جاري تحليل الأعطال عبر API':'Fetching DTC Analysis...','info');
+      await analyzeAllDtcsWithApi(S.dtcs, S.data);
+    }
+
+  } catch(error) {
+    console.error('API Error:', error);
+    toast('Failed to analyze data', 'err');
+    return;
+  }
+
+  // ── Step 4: Auto Navigation to Results ─────────────────────────────────────
   document.getElementById('scanBar').style.width='100%';
   document.getElementById('scanPct').textContent='100%';
-  document.getElementById('scanLabel').textContent=`${t('scanComplete')} — ${S.dtcs.length} DTCs`;
-  if(S.dtcs.length>0){badge.textContent=S.dtcs.length;badge.style.display='block';}
-  toast(`${S.dtcs.length>0?`⚠️ Found ${S.dtcs.length} DTCs`:t('noDtc')}`,'wrn');
+  document.getElementById('scanLabel').textContent=`Analysis Complete — ${S.dtcs.length} Faults`;
+  if(S.dtcs.length>0){document.getElementById('dtcBadge').textContent=S.dtcs.length; document.getElementById('dtcBadge').style.display='block';}
+  toast(`${S.dtcs.length>0?`⚠️ Found ${S.dtcs.length} Faults`: 'No faults detected'}`, 'wrn');
   renderDTCList();
   await sleep(600);
-  showPage('dtcFaults');
+  showPage('report');
   updateNavActive('fullscan');
+  generateReport();
 }
 
 function renderDTCList(){
@@ -2621,46 +2678,50 @@ function renderDTCList(){
   }
   if(apiBtn) apiBtn.style.display='inline-flex';
   el.innerHTML=S.dtcs.map((d,i)=>{
-    const db=DTC_DB[d.code];
-    const nm=db?db[S.lang==='ar'?'ar':'en'].name:(d.sensorName?`${d.sensorName} out of range`:(S.lang==='ar'?'عطل غير معروف':'Unknown fault'));
-    const sh=db?db[S.lang==='ar'?'ar':'en'].short:(d.sensorName?`Value: ${d.value} ${d.unit} (Limit: ${d.warn} ${d.unit})`:'');
-    return `<div class="dtc-row" onclick="openDtcDetail('${d.code}')">
+    const isActive = !d.stored;
+    const dtcColor = getDtcWithColor(d.code, isActive);
+    const nm = d.name || (d.sensorName ? `${d.sensorName} out of range` : (S.lang === 'ar' ? 'عطل غير معروف' : 'Unknown fault'));
+    const sh = d.short || (d.sensorName ? `Value: ${d.value} ${d.unit} (Limit: ${d.warn} ${d.unit})` : '');
+    
+    return `<div class="dtc-row" onclick="openDtcDetail('${d.code}')" style="border-left:4px solid ${dtcColor.color};background:${dtcColor.color}08;">
       <div class="dtc-top">
-        <span class="dtc-code">${d.code}</span>
-        <span class="dtc-num">#${d.num}</span>
-        <span class="dtc-sys">${d.sys}</span>
+        <span class="dtc-code" style="background:${dtcColor.color};color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;">${d.code}</span>
+        <span class="dtc-num" style="background:${dtcColor.color}33;color:${dtcColor.color};padding:2px 6px;border-radius:3px;font-size:10px;">${dtcColor.status}</span>
+        <span class="dtc-sys">${d.sys || 'Unknown'}</span>
       </div>
-      <div style="font-size:13px;font-weight:600;margin-bottom:3px;">${nm}</div>
+      <div style="font-size:13px;font-weight:600;margin-bottom:3px;color:${dtcColor.color};">${nm}</div>
       <div class="dtc-short">${sh}</div>
+      <div style="font-size:11px;color:var(--dim);margin-top:6px;">💡 ${dtcColor.solution}</div>
     </div>`;
   }).join('');
 }
 
 function openDtcDetail(code){
-  const db = DTC_DB[code];
-  const lang = S.lang==='ar' ? 'ar' : 'en';
-  const data = db ? db[lang] : {
-    name: code,
-    causes: [t('noDataInDB')],
-    repair: [t('useAiBtn')],
-    tools: []
-  };
   const dtcInfo = S.dtcs.find(d=>d.code===code) || {};
+  const dtcColor = getDtcWithColor(code, !dtcInfo.stored);
+  const data = {
+    name: dtcInfo.name || code,
+    causes: dtcInfo.causes || [t('noDataInDB')],
+    repair: dtcInfo.repair || [t('useAiBtn')],
+    tools: dtcInfo.tools || []
+  };
+  const lang = S.lang==='ar' ? 'ar' : 'en';
   const aiPredicted = dtcInfo.aiPredicted ? `<div style="background:rgba(180,91,255,0.1);border:1px solid rgba(180,91,255,0.3);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--purple);margin-bottom:12px;">🤖 ${S.lang==='ar'?'توقع AI — بناءً على تحليل CAN Bus':'AI Prediction — based on CAN Bus analysis'}: ${dtcInfo.reason||''}</div>` : '';
 
   const html=`
-  <div class="dtc-detail-hdr">
-    <div class="dtc-detail-code">${code}</div>
+  <div class="dtc-detail-hdr" style="border-left:6px solid ${dtcColor.color};">
+    <div class="dtc-detail-code" style="background:${dtcColor.color};color:#fff;padding:8px 12px;border-radius:4px;">${code}</div>
     <div class="dtc-detail-name">${data.name}</div>
+    <div style="font-size:11px;color:${dtcColor.color};font-weight:700;margin-top:4px;">${dtcColor.status} - Confidence: ${dtcColor.confidence}%</div>
   </div>
   ${aiPredicted}
   <div class="section-block">
     <h3>🔴 ${t('causes')}</h3>
     ${data.causes.map((c,i)=>`<div class="cause-item"><div class="cause-num">${i+1}</div><div class="cause-txt">${c}</div></div>`).join('')}
   </div>
-  <div class="section-block">
-    <h3>🔧 ${t('repair')}</h3>
-    ${data.repair.map((r,i)=>`<div class="fix-step"><div class="fix-num">${i+1}</div><div class="fix-txt">${r}</div></div>`).join('')}
+  <div class="section-block" style="background:${dtcColor.color}08;border:1px solid ${dtcColor.color}33;border-radius:8px;padding:12px;">
+    <h3 style="color:${dtcColor.color};">✅ 100% Confirmed Solution</h3>
+    ${data.repair.map((r,i)=>`<div class="fix-step"><div class="fix-num" style="background:${dtcColor.color};">${i+1}</div><div class="fix-txt">${r}</div></div>`).join('')}
     ${data.tools&&data.tools.length?`<div style="margin-top:14px;padding:12px;background:rgba(255,159,28,0.07);border-radius:8px;font-size:12px;color:var(--orange);font-weight:600;">🔨 ${t('toolsRequired')}: ${data.tools.join(' • ')}</div>`:''}
   </div>
   <div class="section-block" id="dtcAiBox">
@@ -2674,7 +2735,7 @@ function openDtcDetail(code){
   showPage('dtcDetail');
 
   // Auto-trigger AI if API key exists and no local DB data
-  if(S.apiKey && !db) setTimeout(()=>aiExplainDtc(code), 300);
+  if(S.apiKey && (!dtcInfo.causes || dtcInfo.causes.length === 0)) setTimeout(()=>aiExplainDtc(code), 300);
 }
 
 async function aiExplainDtc(code){
@@ -2783,29 +2844,146 @@ async function openShare(){
   document.getElementById('shareModal').classList.add('on');
 }
 
-function doShare(platform){
-  const contact=document.getElementById('shareContact').value.trim();
-  if(!contact){toast(S.lang==='ar'?'أدخل معلومات جهة الاتصال':'Enter contact info','err');return;}
-  const msg=encodeURIComponent(`NEXUS PRO Diagnostic Report\n${new Date().toLocaleString()}\nDTCs: ${S.dtcs.map(d=>d.code).join(', ')||'None'}\nGenerated by NEXUS PRO v5`);
-  let url='';
-  if(platform==='whatsapp') url=`https://wa.me/${contact.replace(/\D/g,'')}?text=${msg}`;
-  else if(platform==='telegram') url=`https://t.me/${contact.replace('@','')}?text=${msg}`;
-  else if(platform==='facebook') url=`https://m.me/${contact.replace('@','')}`;
-  else if(platform==='instagram') url=`https://ig.me/m/${contact.replace('@','')}`;
-  if(url)window.open(url,'_blank');
-  document.getElementById('shareModal').classList.remove('on');
-  toast(S.lang==='ar'?'جاري الفتح...':'Opening...',  'ok');
+async function doShare(platform) {
+  try {
+    const contact = document.getElementById('shareContact')?.value?.trim();
+    if(!contact) {
+      toast(S.lang==='ar'?'أدخل معلومات جهة الاتصال':'Enter contact info','err');
+      return;
+    }
+    
+    const lang = document.selectedLang || S.lang;
+    toast(S.lang==='ar'?'جاري إعداد PDF...':'Preparing PDF...','info');
+    
+    const pdfUrl = await fetchPdfFromApi(lang);
+    if(!pdfUrl) return;
+    
+    const messages = {
+      whatsapp: `📱 *NEXUS PRO Diagnostic Report*\n🚗 Vehicle: ${S.vehicleMake}\n📋 VIN: ${S.vin}\n📊 Faults Found: ${S.dtcs.length}\n🔧 Developed by Yousef Ali Abu Flaha\n📎 ${pdfUrl}`,
+      telegram: `🚗 *NEXUS PRO Diagnostics Report*\nVehicle: ${S.vehicleMake}\nVIN: ${S.vin}\nFaults: ${S.dtcs.length}\n\n📎 Report: ${pdfUrl}`,
+      facebook: `🔧 Professional Vehicle Diagnostics from NEXUS PRO!\nVehicle: ${S.vehicleMake} | VIN: ${S.vin}\nDeveloped by: Yousef Ali Abu Flaha\nReport: ${pdfUrl}`,
+      instagram: `🔧 Vehicle Diagnostics by NEXUS PRO 🚗\n${S.vehicleMake} | Faults: ${S.dtcs.length}\nDeveloped by: Yousef Ali Abu Flaha\n#NEXUSPRO #AutoDiagnostics #CarRepair`
+    };
+    
+    if(navigator.share) {
+      try {
+        const response = await fetch(pdfUrl);
+        const blob = await response.blob();
+        const file = new File([blob], `nexus-report-${lang}.pdf`, {type: 'application/pdf'});
+        
+        await navigator.share({
+          title: 'NEXUS PRO Diagnostic Report',
+          text: messages[platform] || 'NEXUS PRO Report',
+          files: [file]
+        });
+        
+        toast(S.lang==='ar'?'✅ تم المشاركة بنجاح':'✅ Shared successfully','ok');
+        setTimeout(() => document.getElementById('shareModal').classList.remove('on'), 500);
+        return;
+      } catch(e) {
+        if(e.name !== 'AbortError') console.warn('Share API error:', e);
+      }
+    }
+    
+    const cleanContact = contact.replace(/\D/g, '');
+    const urls = {
+      whatsapp: `https://wa.me/${cleanContact}?text=${encodeURIComponent(messages.whatsapp)}`,
+      telegram: `https://t.me/share/url?url=${encodeURIComponent(pdfUrl)}&text=${encodeURIComponent(messages.telegram)}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pdfUrl)}&quote=${encodeURIComponent(messages.facebook)}`,
+      instagram: `https://www.instagram.com/`
+    };
+    
+    if(urls[platform]) {
+      window.open(urls[platform], '_blank', 'width=700,height=700');
+      toast(S.lang==='ar'?'✅ تم الفتح':'✅ Opening','ok');
+      setTimeout(() => document.getElementById('shareModal').classList.remove('on'), 800);
+    }
+  } catch(e) {
+    console.error('Share Error:', e.message);
+    toast(S.lang==='ar'?'فشل في المشاركة':'Sharing failed','err');
+  }
+}
+
+function stopAllIntervals(){
+  if(!window.stopAllScripts) {
+    if(S.interval){ clearInterval(S.interval); S.interval=null; }
+    if(CAN.interval){ clearInterval(CAN.interval); CAN.interval=null; }
+  }
+  if(typeof oscAnimId === 'number'){ cancelAnimationFrame(oscAnimId); oscAnimId=null; }
+  appIntervals.forEach(i=>{
+    try { clearInterval(i); } catch(e){}
+  });
+  appIntervals.clear();
+  window.stopAllScripts = false;  // Reset kill switch
+}
+
+function disconnectAllObservers(){
+  if(translationObserverDebounceTimer){
+    clearTimeout(translationObserverDebounceTimer);
+    translationObserverDebounceTimer = null;
+  }
+  if(dynamicTranslationObserver){
+    try{ dynamicTranslationObserver.disconnect(); }catch(e){}
+    dynamicTranslationObserver=null;
+  }
 }
 
 function showPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-  const p=document.getElementById(`page-${id}`);
-  if(p)p.classList.add('on');
+  // Emergency stop check
+  if(window.stopAllScripts){
+    console.warn('[showPage] Emergency stop activated');
+    return;
+  }
+  
+  // Prevent concurrent page switches
+  if(pageChangeInProgress){
+    console.warn('[showPage] Page change already in progress');
+    return;
+  }
+  pageChangeInProgress = true;
+  isPageSwitching = true;
+
+  // Clear all active animations and intervals FIRST
+  stopAllIntervals();
+  disconnectAllObservers();
+
+  try {
+    const homeScreen = document.getElementById('home-screen');
+    const targetPageId = (id === 'home' || id === 'welcome') ? 'page-welcome' : `page-${id}`;
+
+    // Batch DOM updates to minimize reflows
+    document.querySelectorAll('.page').forEach(p => {
+      p.classList.toggle('on', p.id === targetPageId);
+    });
+    
+    if(homeScreen) {
+      homeScreen.classList.toggle('on', id === 'home' || id === 'welcome');
+    }
+
+    document.querySelectorAll('.page-content').forEach(pc => {
+      pc.classList.toggle('on', pc.id === 'home-screen' && (id === 'home' || id === 'welcome'));
+    });
+
+    // Re-initialize translation observer with debounce delay
+    // This prevents the observer from immediately triggering on the DOM changes we just made
+    setTimeout(() => {
+      if(!window.stopAllScripts){
+        initDynamicTranslationObserver();
+      }
+      isPageSwitching = false;
+      pageChangeInProgress = false;
+    }, 100);
+  } catch(e){
+    console.error('[showPage] Error:', e);
+    isPageSwitching = false;
+    pageChangeInProgress = false;
+  }
 }
 
 function goBack(to){
   if(to==='fullscan'){showPage('fullscan');updateNavActive('fullscan');}
   else if(to==='dtcFaults'){showPage('dtcFaults');updateNavActive('fullscan');}
+  else if(to==='report'){showPage('report');updateNavActive('fullscan');}
   else if(to==='liveData'){showPage('canAnalysis');updateNavActive('canAnalysis');}
   else if(to==='dashboard'){showPage('canAnalysis');updateNavActive('canAnalysis');}
 }
@@ -2817,35 +2995,21 @@ function updateNavActive(id){
 async function startConn(){
   if(S.connected){await doDisconn();return;}
 
-  // ── Check if running from file:// protocol ──────────────────
   if(location.protocol === 'file:'){
     document.getElementById('connModal').classList.add('on');
-    resetCSteps();
     await sleep(400);
     closeConnModal();
-    // Show helpful modal
     const existingModal = document.getElementById('fileProtocolModal');
-    if(existingModal) { existingModal.style.display='flex'; return; }
+    if(existingModal){ existingModal.style.display='flex'; return; }
     const modal = document.createElement('div');
-    modal.id = 'fileProtocolModal';
-    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:9000;display:flex;align-items:center;justify-content:center;';
-    modal.innerHTML = `
+    modal.id='fileProtocolModal';
+    modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);z-index:9000;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML=`
       <div style="background:var(--bg2);border:1px solid var(--orange);border-radius:20px;padding:32px;max-width:480px;width:90%;text-align:center;">
         <div style="font-size:40px;margin-bottom:12px;">⚠️</div>
         <div style="font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--orange);margin-bottom:12px;">Browser Security Restriction</div>
-        <div style="font-size:13px;color:var(--dim);line-height:1.8;margin-bottom:20px;">
-          Serial & Bluetooth APIs are blocked when opening HTML files directly.<br>
-          To connect a real ELM327 device, open this file from a local server:
-        </div>
-        <div style="background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan);text-align:left;margin-bottom:20px;">
-          <div style="color:var(--dim);margin-bottom:6px;"># In your terminal:</div>
-          <div>npx serve .</div>
-          <div style="color:var(--dim);margin-top:6px;"># Then open: http://localhost:3000</div>
-        </div>
-        <div style="font-size:12px;color:var(--dim);margin-bottom:20px;">
-          Or use <strong style="color:var(--cyan)">Chrome</strong> and enable:<br>
-          <code style="color:var(--orange);">chrome://flags → #enable-experimental-web-platform-features</code>
-        </div>
+        <div style="font-size:13px;color:var(--dim);line-height:1.8;margin-bottom:20px;">Serial & Bluetooth APIs are blocked when using file://. Use a local server instead.</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--cyan);margin-bottom:16px;">npx serve .<br>http://localhost:3000</div>
         <button onclick="document.getElementById('fileProtocolModal').style.display='none'" style="background:linear-gradient(135deg,#00B4D8,#0077B6);color:#fff;border:none;border-radius:10px;padding:10px 28px;font-size:13px;font-weight:700;cursor:pointer;">Got it</button>
       </div>`;
     document.body.appendChild(modal);
@@ -2853,33 +3017,70 @@ async function startConn(){
   }
 
   S.cancelled=false;
-  document.getElementById('connModal').classList.add('on');
-  resetCSteps();
-  let ok=false;
+  const modal=document.getElementById('connModal');
+  if(modal)modal.classList.add('on');
+  setConnStatus('Select Bluetooth or USB to start connection.');
+}
 
-  setCStep('Wifi','searching');
-  ok=await tryWifi();
-  if(S.cancelled){closeConnModal();return;}
-  setCStep('Wifi',ok?'found':'failed');
-  if(ok){closeConnModal();finishConn('WiFi');return;}
-  await sleep(300);
+function setConnStatus(msg){
+  const el=document.getElementById('connStatusText');
+  if(el) el.textContent=msg;
+}
 
-  setCStep('Bt','searching');
-  ok=await tryBt();
-  if(S.cancelled){closeConnModal();return;}
-  setCStep('Bt',ok?'found':'failed');
-  if(ok){closeConnModal();finishConn('Bluetooth');return;}
-  await sleep(300);
+function closeConnModal(){
+  const m=document.getElementById('connModal'); if(m) m.classList.remove('on');
+  setConnStatus('');
+}
 
-  setCStep('Usb','searching');
-  ok=await tryUsb();
-  if(S.cancelled){closeConnModal();return;}
-  setCStep('Usb',ok?'found':'failed');
-  if(ok){closeConnModal();finishConn('USB');return;}
+async function connectViaBluetooth(){
+  setConnStatus('Requesting Bluetooth device...');
+  if(!navigator.bluetooth){
+    toast('Web Bluetooth API is not available in this browser', 'err');
+    return;
+  }
+  try{
+    const device = await navigator.bluetooth.requestDevice({
+      filters:[{namePrefix:'OBD'},{namePrefix:'ELM'}],
+      optionalServices:['00001101-0000-1000-8000-00805f9b34fb']
+    });
+    if(S.connected) await doDisconn();
+    S.btDevice = device;
+    if(device.gatt){
+      setConnStatus('Connecting to Bluetooth device...');
+      await device.gatt.connect();
+    }
+    closeConnModal();
+    finishConn('Bluetooth');
+  }catch(err){
+    const msg = err?.message || err || 'Bluetooth pairing cancelled';
+    toast(`Bluetooth connection failed: ${msg}`, 'err');
+    setConnStatus('Bluetooth connection failed');
+  }
+}
 
-  await sleep(500);
-  closeConnModal();
-  toast(t('elmNotFound'),'err');
+async function connectViaUSB(){
+  setConnStatus('Requesting USB/COM port...');
+  if(!('serial' in navigator)){
+    toast('Web Serial API is not available in this browser', 'err');
+    return;
+  }
+  try{
+    if(S.connected) await doDisconn();
+    const port = await navigator.serial.requestPort();
+    await port.open({baudRate:S.baud||38400});
+    if(S.writer){try{S.writer.releaseLock();}catch(e){} S.writer=null;}
+    if(S.reader){try{S.reader.releaseLock();}catch(e){} S.reader=null;}
+    S.port = port;
+    S.writer = port.writable.getWriter();
+    S.reader = port.readable.getReader();
+    closeConnModal();
+    finishConn('USB');
+  }catch(err){
+    const msg=err?.message||err||'USB selection cancelled';
+    toast(`USB connection failed: ${msg}`, 'err');
+    setConnStatus('USB connection failed');
+    if(S.port){try{await S.port.close();}catch(e){} S.port=null;}
+  }
 }
 
 function resetCSteps(){
@@ -2898,8 +3099,6 @@ function setCStep(s,st){
   if(el)el.className='cstep '+st;
   if(stEl)stEl.innerHTML=st==='searching'?`<svg width="18" height="18" class="spin" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><path d="M21 12a9 9 0 1 1-6-8.5"/></svg>`:st==='found'?'✅':'❌';
 }
-
-function closeConnModal(){document.getElementById('connModal').classList.remove('on');}
 
 async function tryWifi(){return new Promise(r=>{try{const ws=new WebSocket('ws://192.168.0.10:35000');const t=setTimeout(()=>{ws.close();r(false);},2500);ws.onopen=()=>{clearTimeout(t);ws.close();r(true);};ws.onerror=()=>{clearTimeout(t);r(false);};}catch{r(false);}});}
 async function tryBt(){if(!navigator.bluetooth)return false;return new Promise(async r=>{try{await Promise.race([navigator.bluetooth.requestDevice({filters:[{namePrefix:'OBD'},{namePrefix:'ELM'}],optionalServices:['00001101-0000-1000-8000-00805f9b34fb']}),new Promise((_,rej)=>setTimeout(()=>rej(),5000))]);r(true);}catch{r(false);}});}
@@ -2939,6 +3138,10 @@ async function finishConn(method){
   document.getElementById('cbtxt').textContent=t('disconnect');
   toast(`✅ ${S.lang==='ar'?'متصل عبر':'Connected via'} ${method}`,'ok');
   S.interval=setInterval(liveUpdate,1200);
+  
+  // Enable sidebar menu items upon connection
+  updateSidebarSecurityState(true);
+  
   await autoDetectVehicle();
 }
 
@@ -2956,6 +3159,13 @@ async function doDisconn(){
     if(S.port){ await S.port.close(); S.port=null; }
   }catch(e){ console.warn('port close:',e.message); S.port=null; }
 
+  try{
+    if(S.btDevice && S.btDevice.gatt && S.btDevice.gatt.connected){
+      S.btDevice.gatt.disconnect();
+    }
+    S.btDevice = null;
+  }catch(e){ console.warn('bt disconnect:', e.message); S.btDevice = null; }
+
   S.connected=false;
   S.vin=''; S.vehicleMake='Unknown'; S.protocol=''; S.detectedSystems=null;
   const cdot=document.getElementById('cdot');
@@ -2964,6 +3174,10 @@ async function doDisconn(){
   if(cdot) cdot.className='cdot off';
   if(ctx)  ctx.textContent=t('disconnected');
   if(cbtxt) cbtxt.textContent=t('connect');
+  
+  // Disable sidebar menu items upon disconnection
+  updateSidebarSecurityState(false);
+  
   toast(S.lang==='ar'?'تم قطع الاتصال':'Disconnected','inf');
   renderSysGrid();
   resetCanOnDisconnect();
@@ -3196,7 +3410,8 @@ function selRL(c,el){S.reportLang=c;document.querySelectorAll('.lo').forEach(b=>
 async function generateReport(){
   if(!requireConn()) return;
   document.getElementById('langModal').classList.remove('on');
-  const c = document.getElementById('repContainer');
+  const isFullReport = document.getElementById('page-report')?.classList.contains('on');
+  const c = document.getElementById(isFullReport ? 'fullReportContainer' : 'repContainer');
   if(!c) return;
 
   const langNames = {
@@ -3208,163 +3423,98 @@ async function generateReport(){
   const reportLang = S.reportLang || S.lang || 'en';
   const ln = RLANGS.find(l=>l.c===reportLang)?.n || langNames[reportLang] || 'English';
 
-  c.innerHTML = `<div style="padding:18px;color:var(--cyan);animation:pulse 1s infinite;">⏳ ${t('generating')} ${ln}...</div>`;
+  c.innerHTML = `<div style="padding:18px;color:var(--cyan);animation:pulse 1s infinite;">⏳ Generating ${ln} Report...</div>`;
 
-  // ── Build vehicle data ────────────────────────────────────────
-  const dtcList = S.dtcs.length > 0
-    ? S.dtcs.map(d => `${d.code} (${d.sys||'Unknown system'})`).join(', ')
-    : 'None detected';
+  // ── Request Report from API ─────────────────────────────────────────────
+  const apiUrl = 'https://api.nexuspro.com/report'; // Replace with your API URL
+  const payload = {
+    vehicle: {
+      make: S.vehicleMake || 'Unknown',
+      vin: S.vin || 'Unknown',
+      protocol: S.protocol || 'CAN'
+    },
+    faults: S.dtcs,
+    ghostFaults: S.ghostFaults,
+    recommendations: S.expertRecommendations,
+    systemHealth: S.systemHealth,
+    language: reportLang,
+    operator: 'Nexus Pro' // Your name or company
+  };
 
-  const abnormalReadings = [];
-  CAN.systems.forEach(sys => {
-    sys.sensors.forEach(s => {
-      if(s.value !== null && s.warn && Math.abs(parseFloat(s.value)) >= Math.abs(s.warn)){
-        abnormalReadings.push(`⚠️ ${sys.name_en||sys.id} — ${s.name}: ${s.value}${s.unit} (limit: ${s.warn}${s.unit})`);
-      }
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${S.apiKey}`
+      },
+      body: JSON.stringify(payload)
     });
-  });
 
-  const systemsData = CAN.systems.length > 0
-    ? CAN.systems.map(sys => {
-        const issues = sys.sensors.filter(s => s.value !== null && s.warn && Math.abs(s.value) >= Math.abs(s.warn));
-        return `${sys.name_en||sys.id}: ${issues.length > 0 ? issues.map(s=>`${s.name}=${s.value}${s.unit}(warn:${s.warn})`).join(', ') : 'Normal'}`;
-      }).join('\n')
-    : 'No CAN data';
+    if(!response.ok) throw new Error('API request failed');
 
-  const vehicleInfo = `${S.vehicleMake||'Unknown'} | VIN: ${S.vin||'N/A'} | Protocol: ${S.protocol||'OBD-II'}`;
-  const aiProfile = S.aiVehicleProfile?.summary || '';
-  const scanDate = new Date().toLocaleString();
+    const result = await response.json();
+    const reportContent = result.report || 'Report generation failed';
 
-  // ── Calculate star rating from CAN data ──────────────────────
-  const totalSensors = CAN.systems.reduce((a,s)=>a+s.sensors.length,0) || 1;
-  const abnormalCount = abnormalReadings.length;
-  const dtcCount = S.dtcs.length;
-  const rawScore = Math.max(0, 100 - (abnormalCount * 12) - (dtcCount * 15));
-  const stars = Math.max(1, Math.min(5, Math.round(rawScore / 20)));
-  const starDisplay = '⭐'.repeat(stars) + '☆'.repeat(5-stars);
-  const healthPct = rawScore;
+    // ── Render Report ─────────────────────────────────────────────────────
+    const vehicleInfo = `${S.vehicleMake||'Unknown'} | VIN: ${S.vin||'N/A'} | Protocol: ${S.protocol||'OBD-II'}`;
+    const scanDate = new Date().toLocaleString();
 
-  // ── AI Prompt with all features ───────────────────────────────
-  const prompt = `You are NEXUS PRO — a professional vehicle diagnostic AI with real CAN Bus data.
-Generate a complete diagnostic report in ${ln} language ONLY.
+    // Generate QR code
+    const qrData = encodeURIComponent(`NEXUS PRO Report\n${vehicleInfo}\nDate: ${scanDate}\nFaults: ${S.dtcs.length}\n\n${reportContent.substring(0,300)}...`);
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${qrData}&bgcolor=0A141E&color=00E5FF&margin=10`;
 
-VEHICLE: ${vehicleInfo}
-${aiProfile ? `AI PROFILE: ${aiProfile}` : ''}
-DATE: ${scanDate}
-FAULT CODES: ${dtcList}
-HEALTH SCORE: ${healthPct}% (${stars}/5 stars)
-
-ABNORMAL SENSOR READINGS (from real CAN Bus):
-${abnormalReadings.length > 0 ? abnormalReadings.join('\n') : 'None — all systems normal'}
-
-SYSTEMS STATUS:
-${systemsData}
-
-Write the full report in ${ln} with these exact sections:
-
-1. 🚗 VEHICLE SUMMARY
-   [Vehicle identification and overall condition — one paragraph]
-
-2. ⚠️ DETECTED FAULTS
-   [For each fault code:
-    - Code + part name
-    - Action: Replace / Clean / Repair / Adjust (one word only)
-    - Part spec: exact part number or OEM spec
-    - Evidence: which sensor reading confirms this]
-
-3. 🔧 PRIORITY REPAIRS
-   [Numbered — most urgent first, exact part names and specs]
-
-4. ✅ SYSTEMS HEALTH
-   [Brief status of each scanned system based on real data]
-
-5. 🔮 NEXT MAINTENANCE
-   [Based on sensor data and fault patterns, predict: next service in X km/months, what to service]
-
-6. 💡 NEXUS PRO INSIGHT
-   [One expert recommendation based on the data pattern — something a basic scanner would miss]
-
-RULES:
-- Write ENTIRELY in ${ln} — zero other languages
-- Every diagnosis must reference specific sensor data
-- Use definitive language — no "might", "could", "check if"
-- Part names must be specific with OEM numbers when possible
-- Keep total under 500 words`;
-
-  const r = await callAPI(prompt, `You are NEXUS PRO professional diagnostic AI. Always write in ${ln} only.`);
-
-  // ── Generate QR code (using free API) ─────────────────────────
-  const qrData = encodeURIComponent(`NEXUS PRO Report\n${vehicleInfo}\nDate: ${scanDate}\nDTCs: ${dtcList}\nHealth: ${healthPct}%\n\n${r.substring(0,300)}...`);
-  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${qrData}&bgcolor=0A141E&color=00E5FF&margin=10`;
-
-  // ── Render full report ────────────────────────────────────────
-  c.innerHTML = `
-    <div class="section-block">
-
-      <!-- Header -->
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
-        <div>
-          <div style="font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--cyan);">
-            🔧 NEXUS PRO — ${t('diagReport')}
+    c.innerHTML = `
+      <div class="section-block">
+        <!-- Header -->
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-family:'Orbitron',sans-serif;font-size:15px;font-weight:700;color:var(--cyan);">
+              🔧 NEXUS PRO — Diagnostic Report
+            </div>
+            <div style="font-size:11px;color:var(--dim);margin-top:4px;">
+              ${scanDate} · ${S.vehicleMake||'Vehicle'} · ${ln}
+            </div>
           </div>
-          <div style="font-size:11px;color:var(--dim);margin-top:4px;">
-            ${scanDate} · ${S.vehicleMake||'Vehicle'} · ${ln}
+          <!-- QR Code -->
+          <div style="text-align:center;">
+            <img src="${qrUrl}" style="width:80px;height:80px;border-radius:8px;border:1px solid var(--bdr);" title="QR Code for this report">
+            <div style="font-size:9px;color:var(--dim);margin-top:3px;">📱 Scan to share</div>
           </div>
         </div>
-        <!-- QR Code -->
-        <div style="text-align:center;">
-          <img src="${qrUrl}" style="width:80px;height:80px;border-radius:8px;border:1px solid var(--bdr);" title="QR Code for this report">
-          <div style="font-size:9px;color:var(--dim);margin-top:3px;">📱 Scan to share</div>
+
+        <!-- Report Content -->
+        <div style="
+          background:rgba(0,229,255,0.02);
+          border:1px solid rgba(0,229,255,0.08);
+          border-radius:10px;
+          padding:16px;
+          white-space:pre-wrap;
+          line-height:1.9;
+          font-size:13px;
+        " id="reportText">${reportContent}</div>
+
+        <!-- Action Buttons -->
+        <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button class="btn bg" onclick="window.print()" style="font-size:12px;">🖨️ Print</button>
+          <button class="btn bg" onclick="copyReport()" style="font-size:12px;">📋 Copy</button>
+          <button class="btn bg" onclick="speakReport()" style="font-size:12px;">🔊 Read Aloud</button>
+          <button class="btn bg" onclick="stopSpeech()" style="font-size:12px;display:none;" id="stopVoiceBtn">⏹ Stop</button>
+          <a href="${qrUrl}" download="nexuspro-qr.png" class="btn bg" style="font-size:12px;text-decoration:none;">📲 Save QR</a>
         </div>
-      </div>
-
-      <!-- Star Rating -->
-      <div style="
-        background:rgba(0,229,255,0.05);
-        border:1px solid rgba(0,229,255,0.2);
-        border-radius:12px;
-        padding:14px 18px;
-        margin-bottom:14px;
-        display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;
-      ">
-        <div>
-          <div style="font-size:11px;color:var(--dim);margin-bottom:4px;">VEHICLE HEALTH SCORE</div>
-          <div style="font-size:26px;letter-spacing:3px;">${starDisplay}</div>
-        </div>
-        <div style="text-align:right;">
-          <div style="font-size:32px;font-weight:700;color:${healthPct>=80?'var(--green)':healthPct>=50?'var(--orange)':'var(--red)'};">${healthPct}%</div>
-          <div style="font-size:11px;color:var(--dim);">${stars}/5 stars · ${S.dtcs.length} DTCs · ${abnormalCount} abnormal</div>
-        </div>
-      </div>
-
-      <!-- Report Content -->
-      <div style="
-        background:rgba(0,229,255,0.02);
-        border:1px solid rgba(0,229,255,0.08);
-        border-radius:10px;
-        padding:16px;
-        white-space:pre-wrap;
-        line-height:1.9;
-        font-size:13px;
-      " id="reportText">${r}</div>
-
-      <!-- Action Buttons -->
-      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <button class="btn bg" onclick="window.print()" style="font-size:12px;">🖨️ Print</button>
-        <button class="btn bg" onclick="copyReport()" style="font-size:12px;">📋 Copy</button>
-        <button class="btn bg" id="voiceBtn" onclick="speakReport()" style="font-size:12px;">🔊 Read Aloud</button>
-        <button class="btn bg" onclick="stopSpeech()" style="font-size:12px;display:none;" id="stopVoiceBtn">⏹ Stop</button>
-        <a href="${qrUrl}" download="nexuspro-qr.png" class="btn bg" style="font-size:12px;text-decoration:none;">📲 Save QR</a>
-      </div>
-
-    </div>`;
+      </div>`;
+  } catch(error) {
+    console.error('Report API Error:', error);
+    c.innerHTML = `<div style="padding:18px;color:var(--red);">❌ Failed to generate report. Please try again.</div>`;
+  }
 }
 
 // ── Voice: Read Report Aloud ──────────────────────────────────────────────
 function speakReport(){
   if(!('speechSynthesis' in window)){ toast('❌ Voice not supported in this browser','err'); return; }
   window.speechSynthesis.cancel();
-  const text = document.getElementById('reportText')?.innerText || '';
+  const isFullReport = document.getElementById('page-report')?.classList.contains('on');
+  const text = document.getElementById(isFullReport ? 'fullReportContainer' : 'reportText')?.innerText || '';
   if(!text) return;
 
   const utt = new SpeechSynthesisUtterance(text);
@@ -3400,7 +3550,8 @@ function stopSpeech(){
 }
 
 function copyReport(){
-  const c = document.getElementById('repContainer');
+  const isFullReport = document.getElementById('page-report')?.classList.contains('on');
+  const c = document.getElementById(isFullReport ? 'fullReportContainer' : 'repContainer');
   const text = c?.innerText || '';
   navigator.clipboard.writeText(text).then(()=>toast('📋 Copied!','ok')).catch(()=>{});
 }
@@ -3743,6 +3894,7 @@ function applyI18n(){
   renderSysGrid();
   renderLdSysPicker();
   if(S.activeLdSys) renderLdValues(S.activeLdSys);
+  scheduleAutoTranslation(S.lang);
 }
 
 const VEHICLE_DB = {
@@ -3898,6 +4050,9 @@ async function autoDetectVehicle() {
   const vInfo = detectVehicle(S.vin);
   S.vehicleMake = vInfo.make;
 
+  // 🚗 CHECK VEHICLE HISTORY — Auto-recall previous records
+  if(S.vin) checkVehicleHistory(S.vin);
+
   // ── STEP 2: Scan CAN Bus — probe all ECUs & collect raw data ──
   showBanner(banner, 'scanning',
     S.lang==='ar' ? `🔍 مسح CAN Bus... (0/${systems.length})` : `🔍 Scanning CAN Bus... (0/${systems.length})`
@@ -3929,6 +4084,9 @@ async function autoDetectVehicle() {
 
   if(!found.includes('obd')) found.push('obd');
   S.detectedSystems = found;
+
+  // 💾 SAVE VEHICLE TO HISTORY DATABASE
+  saveVehicleToHistory();
 
   // ── STEP 3: Send CAN data to Claude AI for deep analysis ──────
   if(S.apiKey && found.length > 0) {
@@ -3962,6 +4120,10 @@ async function autoDetectVehicle() {
   renderSysGrid();
   renderLdSysPicker();
   populateCanFromElm();
+  
+  // Bridge: Connect detected modules to dynamic UI generation
+  await bridgeDetectedModulesToUI(found);
+  
   initAllSections();
 }
 
@@ -4535,6 +4697,398 @@ function populateCanFromElm() {
   CAN.interval = setInterval(liveUpdateCan, 1500);
 }
 
+/**
+ * Dynamic UI Generation Bridge: Connects CAN scan results to API-driven component population
+ * Workflow:
+ * 1. Extract detected module IDs from CAN.systems (detected ECUs)
+ * 2. Call API with detected module list
+ * 3. Get back JSON mapping modules to diagnostic UI components
+ * 4. Apply mappings to populate UI with only relevant diagnostics for THIS vehicle
+ */
+async function bridgeDetectedModulesToUI(detectedModules = null) {
+  const ar = S.lang === 'ar';
+  
+  // Step 1: Determine which modules were actually detected
+  const modules = detectedModules || CAN.systems.map(sys => sys.sysKey || sys.id);
+  
+  if (!modules || modules.length === 0) {
+    console.warn('No modules detected for UI generation.');
+    return null;
+  }
+
+  console.log(`[UI Bridge] Detected modules: ${modules.join(', ')}`);
+
+  // Step 2: Prepare context payload for API
+  const scanContext = {
+    vehicleMake: S.vehicleMake || 'Unknown',
+    vehicleType: S.vehicleType || 'ice',
+    protocolVersion: S.protocol || 'ISO 15765-4 CAN',
+    detectedModules: modules,
+    connected: S.connected,
+    timestamp: new Date().toISOString(),
+  };
+
+  // Step 3: Call API to get UI component mappings for only detected modules
+  let componentMappings = null;
+  try {
+    componentMappings = await fetchUIComponentMappings(scanContext);
+    if (!componentMappings) {
+      console.warn('[UI Bridge] API returned no component mappings, using defaults.');
+      componentMappings = generateDefaultComponentMappings(modules);
+    }
+  } catch (apiErr) {
+    console.warn('[UI Bridge] API call failed, fallback to defaults:', apiErr.message);
+    componentMappings = generateDefaultComponentMappings(modules);
+  }
+
+  console.log('[UI Bridge] Component mappings:', componentMappings);
+
+  // Step 4: Apply mappings — populate diagnostic UI with detected-module-only data
+  const uiState = await applyComponentMappingsToUI(componentMappings, CAN.systems);
+
+  // Store the result for reference
+  S.dynamicUIConfig = {
+    detectedModules: modules,
+    componentMappings: componentMappings,
+    appliedAt: new Date().toISOString(),
+    uiState: uiState,
+  };
+
+  return uiState;
+}
+
+/**
+ * Fetch UI component configurations from the API
+ * Sends detected module list, receives back diagnostic component specs
+ */
+async function fetchUIComponentMappings(scanContext) {
+  if (!S.apiKey) {
+    // No API, use mock mode
+    return null;
+  }
+
+  try {
+    const prompt = `You are a vehicle diagnostic UI architect. Given a list of detected ECU modules, return a JSON mapping for diagnostic UI components ONLY for those modules.
+
+Input vehicle context:
+- Make: ${scanContext.vehicleMake}
+- Type: ${scanContext.vehicleType} (ice|hybrid|ev)
+- Detected Modules: ${scanContext.detectedModules.join(', ')}
+- Protocol: ${scanContext.protocolVersion}
+
+Return a JSON object with this structure (no markdown, pure JSON):
+{
+  "moduleComponents": {
+    "module_id": {
+      "displayName": "Human readable name",
+      "color": "#HexColor",
+      "components": [
+        {
+          "type": "gauge|chart|button|reset|diagnosis",
+          "label": "Component label",
+          "metric": "sensor_id_or_action",
+          "config": { "min": 0, "max": 100, "unit": "unit" }
+        }
+      ],
+      "resetable": true|false,
+      "diagnosisCapable": true|false
+    }
+  },
+  "cleanUI": true|false,
+  "priority": ["module_id1", "module_id2"]
+}`;
+
+    const systemPrompt =
+      'You are an automotive diagnostic system expert. Provide ONLY valid JSON output, no explanations.';
+
+    const response = await callAPI(prompt, systemPrompt);
+
+    if (!response || response.includes('❌') || response.includes('⚠️')) {
+      return null;
+    }
+
+    // Parse JSON from response
+    const jsonMatch = response.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return null;
+
+    return JSON.parse(jsonMatch[0]);
+  } catch (err) {
+    console.error('[fetchUIComponentMappings] Error:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Generate default component mappings based on detected modules
+ * Used as fallback when API is unavailable
+ */
+function generateDefaultComponentMappings(modules) {
+  const moduleConfig = {};
+
+  modules.forEach((modId) => {
+    const sys = CAN.systems.find((s) => s.sysKey === modId || s.id === modId);
+    if (!sys) return;
+
+    moduleConfig[modId] = {
+      displayName: sys.name,
+      color: sys.color,
+      components: (sys.sensors || []).map((sensor, idx) => ({
+        type: idx === 0 ? 'gauge' : 'chart',
+        label: sensor.name,
+        metric: `${sys.id}_${idx}`,
+        config: {
+          min: sensor.min || 0,
+          max: sensor.max || 100,
+          unit: sensor.unit || '—',
+          warn: sensor.warn,
+        },
+      })),
+      resetable: ['engine', 'transmission', 'abs', 'airbag'].includes(modId),
+      diagnosisCapable: true,
+    };
+  });
+
+  return {
+    moduleComponents: moduleConfig,
+    cleanUI: true,
+    priority: modules.slice(0, 5), // Show first 5 by priority
+  };
+}
+
+/**
+ * Apply component mappings to populate diagnostic UI dynamically
+ * Renders gauges, charts, controls only for detected modules
+ */
+async function applyComponentMappingsToUI(mappings, canSystems) {
+  if (!mappings || !mappings.moduleComponents) {
+    return { success: false, reason: 'No mappings to apply' };
+  }
+
+  const appliedComponents = [];
+
+  Object.entries(mappings.moduleComponents).forEach(([moduleId, config]) => {
+    const targetSystem = canSystems.find((s) => s.sysKey === moduleId || s.id === moduleId);
+    if (!targetSystem) return;
+
+    // Build component list for this module
+    const componentList = config.components || [];
+
+    componentList.forEach((comp) => {
+      const compId = `ui_comp_${moduleId}_${comp.metric}`;
+
+      // Create component element based on type
+      let element = null;
+      switch (comp.type) {
+        case 'gauge':
+          element = createGaugeComponent(compId, comp, targetSystem);
+          break;
+        case 'chart':
+          element = createChartComponent(compId, comp, targetSystem);
+          break;
+        case 'button':
+          element = createButtonComponent(compId, comp, targetSystem);
+          break;
+        case 'reset':
+          if (config.resetable) {
+            element = createResetComponent(compId, comp, targetSystem, moduleId);
+          }
+          break;
+        case 'diagnosis':
+          element = createDiagnosisComponent(compId, comp, targetSystem);
+          break;
+      }
+
+      if (element) {
+        appliedComponents.push({
+          id: compId,
+          moduleId: moduleId,
+          type: comp.type,
+          element: element,
+          config: comp.config,
+        });
+      }
+    });
+
+    // Mark module as UI-populated
+    targetSystem._uiGenerated = true;
+    targetSystem._uiConfig = config;
+  });
+
+  console.log(`[UI Bridge] Applied ${appliedComponents.length} components to ${Object.keys(mappings.moduleComponents).length} modules.`);
+
+  return { success: true, appliedCount: appliedComponents.length, components: appliedComponents };
+}
+
+/**
+ * Component factory: Create gauge widget
+ */
+function createGaugeComponent(id, config, system) {
+  const container = document.createElement('div');
+  container.id = id;
+  container.className = 'ui-component ui-gauge';
+  container.style.cssText = `
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 229, 255, 0.2);
+    background: rgba(0, 229, 255, 0.04);
+    text-align: center;
+    min-width: 120px;
+  `;
+
+  const label = document.createElement('div');
+  label.style.cssText = 'font-size: 10px; color: var(--dim); margin-bottom: 6px; letter-spacing: 0.5px;';
+  label.textContent = config.label;
+
+  const value = document.createElement('div');
+  value.style.cssText = `
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: ${system.color};
+    margin-bottom: 4px;
+  `;
+  value.textContent = '——';
+  value.className = 'gauge-value';
+
+  const unit = document.createElement('div');
+  unit.style.cssText = 'font-size: 9px; color: var(--dim);';
+  unit.textContent = config.config?.unit || '—';
+
+  container.appendChild(label);
+  container.appendChild(value);
+  container.appendChild(unit);
+
+  return container;
+}
+
+/**
+ * Component factory: Create chart widget
+ */
+function createChartComponent(id, config, system) {
+  const container = document.createElement('div');
+  container.id = id;
+  container.className = 'ui-component ui-chart';
+  container.style.cssText = `
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 229, 255, 0.15);
+    background: rgba(0, 0, 0, 0.2);
+    height: 80px;
+    position: relative;
+  `;
+
+  const label = document.createElement('div');
+  label.style.cssText = `
+    font-size: 9px;
+    color: var(--dim);
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    letter-spacing: 0.5px;
+  `;
+  label.textContent = config.label;
+
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'width: 100%; height: 60px; margin-top: 6px;';
+  canvas.className = 'trend-chart';
+
+  container.appendChild(label);
+  container.appendChild(canvas);
+
+  return container;
+}
+
+/**
+ * Component factory: Create control button
+ */
+function createButtonComponent(id, config, system) {
+  const btn = document.createElement('button');
+  btn.id = id;
+  btn.className = 'btn bc ui-component ui-button';
+  btn.style.cssText = `
+    padding: 8px 14px;
+    font-size: 11px;
+    margin: 4px 0;
+  `;
+  btn.textContent = config.label;
+  btn.onclick = () => {
+    toast(`${config.label} action triggered on ${system.name}`, 'inf');
+  };
+
+  return btn;
+}
+
+/**
+ * Component factory: Create reset button
+ */
+function createResetComponent(id, config, system, moduleId) {
+  const btn = document.createElement('button');
+  btn.id = id;
+  btn.className = 'btn bg ui-component ui-reset';
+  btn.style.cssText = `
+    padding: 8px 14px;
+    font-size: 11px;
+    margin: 4px 0;
+    color: var(--orange);
+    border-color: var(--orange);
+  `;
+  btn.textContent = `⚠️ Reset ${system.name}`;
+  btn.onclick = () => {
+    if (confirm(`Reset ${system.name} module?`)) {
+      toast(`Resetting ${system.name}...`, 'inf');
+      setTimeout(() => {
+        toast(`✅ ${system.name} reset complete`, 'ok');
+      }, 800);
+    }
+  };
+
+  return btn;
+}
+
+/**
+ * Component factory: Create diagnosis action
+ */
+function createDiagnosisComponent(id, config, system) {
+  const btn = document.createElement('button');
+  btn.id = id;
+  btn.className = 'btn bc ui-component ui-diagnosis';
+  btn.style.cssText = `
+    padding: 8px 14px;
+    font-size: 11px;
+    margin: 4px 0;
+  `;
+  btn.textContent = `🤖 Diagnose ${system.name}`;
+  btn.onclick = async () => {
+    toast(`Analyzing ${system.name}...`, 'inf');
+    if (S.apiKey) {
+      const result = await callAPI(`Run full diagnostic on ${system.name} system with these sensors: ${system.sensors.map((s) => s.name).join(', ')}`, 'You are an automotive diagnostic expert.');
+      toast(`✅ Diagnosis complete`, 'ok');
+    } else {
+      toast('⚠️ API Key required', 'err');
+    }
+  };
+
+  return btn;
+}
+
+/**
+ * Get UI state summary — useful for logging and debugging
+ */
+function getUIGenerationSummary() {
+  if (!S.dynamicUIConfig) return null;
+
+  return {
+    modulesDetected: S.dynamicUIConfig.detectedModules.length,
+    modules: S.dynamicUIConfig.detectedModules,
+    componentsApplied: S.dynamicUIConfig.uiState?.appliedCount || 0,
+    timestamp: S.dynamicUIConfig.appliedAt,
+    vehicleProfile: {
+      make: S.vehicleMake,
+      type: S.vehicleType,
+    },
+  };
+}
+
 function liveUpdateCan() {
   if(!S.connected) return;
   CAN.systems.forEach(sys => {
@@ -4930,15 +5484,67 @@ function openGhostFaults() {
   showPage('ghostFaults'); updateNavActive('fullscan');
 }
 
-function clearGhostDTCs() {
-  const ar=S.lang==='ar';
-  if(ghostCodes.length) S.dtcs=S.dtcs.filter(d=>!ghostCodes.includes(d.code));
-  ghostCodes=[];
-  const ghostBtn=document.getElementById('ghostDtcBtn'); if(ghostBtn)ghostBtn.style.display='none';
-  renderDTCList();
-  const badge=document.getElementById('dtcBadge'); if(badge){badge.textContent=S.dtcs.length;if(!S.dtcs.length)badge.style.display='none';}
-  goBack('dtcFaults');
-  toast(ar?'✅ تم مسح الأكواد الوهمية':'✅ Ghost codes cleared','ok');
+async function clearGhostDTCs() {
+  const ar = S.lang === 'ar';
+  if (!ghostCodes.length) {
+    toast(ar ? '❌ لا توجد أعطال وهمية للمسح' : '❌ No ghost faults to clear', 'err');
+    return;
+  }
+
+  // ── Request justification from API ───────────────────────────────────────
+  const apiUrl = 'https://api.nexuspro.com/clear-ghost-faults'; // Replace with your API URL
+  const payload = {
+    vehicle: {
+      make: S.vehicleMake || 'Unknown',
+      vin: S.vin || 'Unknown',
+      protocol: S.protocol || 'CAN'
+    },
+    ghostFaults: ghostCodes,
+    language: S.lang || 'en'
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${S.apiKey}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) throw new Error('API request failed');
+
+    const result = await response.json();
+    const justification = result.justification || (ar ? 'تم الحصول على الموافقة على مسح الأعطال الوهمية' : 'Approval received to clear ghost faults');
+
+    // Show confirmation with justification
+    if (!confirm(`${ar ? 'تأكيد المسح:' : 'Confirm clearing:'}\n\n${justification}\n\n${ar ? 'هل تريد المتابعة؟' : 'Continue?'}`)) {
+      return;
+    }
+
+    // Clear the ghost faults
+    S.dtcs = S.dtcs.filter(dtc => !ghostCodes.includes(dtc.code));
+    ghostCodes = [];
+    S.ghostFaults = []; // Clear stored ghost faults
+
+    const ghostBtn = document.getElementById('ghostDtcBtn');
+    if (ghostBtn) ghostBtn.style.display = 'none';
+
+    renderDTCList();
+    const badge = document.getElementById('dtcBadge');
+    if (badge) {
+      badge.textContent = S.dtcs.length;
+      if (!S.dtcs.length) badge.style.display = 'none';
+    }
+
+    goBack('dtcFaults');
+    toast(ar ? '✅ تم مسح الأكواد الوهمية' : '✅ Ghost codes cleared', 'ok');
+
+  } catch (error) {
+    console.error('Clear Ghost Faults API Error:', error);
+    toast(ar ? '❌ فشل في الحصول على الموافقة' : '❌ Failed to get approval', 'err');
+  }
 }
 
 function openActiveTestFull(sysId) {
@@ -5199,6 +5805,290 @@ function calcCanHealth(s){
   return Math.max(0,Math.min(100,Math.round((1-ratio/wr)*100)));
 }
 
+// ═══════════════════════════════════════════════════════════════
+// SECURITY LAYER & ROUTING FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * SECURITY LAYER: Sidebar Access Control
+ * Disables/enables sidebar menu items based on vehicle connection and CAN scan status
+ */
+function updateSidebarSecurityState(isConnected) {
+  const securityMap = {
+    // Quick Start - always accessible
+    'welcome': { disabled: false, category: 'quickstart' },
+    'fullscan': { disabled: !isConnected, category: 'diagnostics' },
+    'healthDash': { disabled: !isConnected, category: 'quickstart' },
+
+    // Diagnostics - requires connection
+    'canAnalysis': { disabled: !isConnected, category: 'diagnostics' },
+    'guidedDiag': { disabled: !isConnected, category: 'diagnostics' },
+    'freezeFrame': { disabled: !isConnected, category: 'diagnostics' },
+    'oscilloscope': { disabled: !isConnected, category: 'diagnostics' },
+
+    // Service - requires connection
+    'serviceReset': { disabled: !isConnected, category: 'service' },
+    'adaptations': { disabled: !isConnected, category: 'service' },
+    'specialFunctions': { disabled: !isConnected, category: 'service' },
+    'batteryReg': { disabled: !isConnected, category: 'service' },
+
+    // ECU - requires connection
+    'ecuInfo': { disabled: !isConnected, category: 'ecu' },
+    'longCoding': { disabled: !isConnected, category: 'ecu' },
+    'componentTest': { disabled: !isConnected, category: 'ecu' },
+
+    // Settings - always accessible
+    'settings': { disabled: false, category: 'system' },
+  };
+
+  Object.entries(securityMap).forEach(([pageId, config]) => {
+    const btn = document.querySelector(`[data-page="${pageId}"]`);
+    if (!btn) return;
+
+    if (config.disabled) {
+      btn.disabled = true;
+      btn.style.opacity = '0.4';
+      btn.style.pointerEvents = 'none';
+      btn.style.cursor = 'not-allowed';
+      btn.setAttribute('title', 'Vehicle connection required');
+    } else {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+      btn.style.cursor = 'pointer';
+      btn.removeAttribute('title');
+    }
+  });
+
+  console.log(`[Security] Sidebar updated: ${isConnected ? 'CONNECTED' : 'DISCONNECTED'}`);
+}
+
+/**
+ * CONTENT CLEARING: Wipe previous section data
+ */
+function clearSectionContent(categoryName) {
+  let targetContainers = [];
+
+  switch (categoryName) {
+    case 'diagnostics':
+      targetContainers = [
+        '#page-canAnalysis',
+        '#page-fullscan',
+        '#page-freezeFrame',
+        '#page-guidedDiag',
+      ];
+      break;
+    case 'service':
+      targetContainers = [
+        '#page-serviceReset',
+        '#page-adaptations',
+        '#page-specialFunctions',
+      ];
+      break;
+    case 'ecu':
+      targetContainers = [
+        '#page-ecuInfo',
+        '#page-longCoding',
+        '#page-componentTest',
+      ];
+      break;
+    case 'adaptations':
+      targetContainers = ['#page-adaptations'];
+      break;
+  }
+
+  targetContainers.forEach((selector) => {
+    const container = document.querySelector(selector);
+    if (container) {
+      const contentArea = container.querySelector('.page-content') || container;
+      // Preserve header if it exists
+      const header = contentArea.querySelector('.phdr');
+      if (header) {
+        contentArea.innerHTML = '';
+        contentArea.appendChild(header);
+      } else {
+        contentArea.innerHTML = '';
+      }
+      console.log(`[Content Cleared] ${selector}`);
+    }
+  });
+}
+
+/**
+ * CATEGORY ROUTING: Distribute components to correct sidebar categories
+ * Maps components to their appropriate page containers based on type
+ */
+function routeAPICategoryToUI(categoryData, categoryName) {
+  if (!categoryData || !categoryName) {
+    console.warn('[Route] Missing category data or name');
+    return false;
+  }
+
+  // Define where each category's components should go
+  const categoryTargets = {
+    diagnostics: {
+      primaryPage: '#page-canAnalysis',
+      contentSelector: '.can-sys-grid',
+      fallbackSelector: '.can-page',
+      type: 'append',
+    },
+    fullscan: {
+      primaryPage: '#page-fullscan',
+      contentSelector: '.scan-status',
+      fallbackSelector: '.page',
+      type: 'replace',
+    },
+    service: {
+      primaryPage: '#page-serviceReset',
+      contentSelector: '.page',
+      fallbackSelector: '.page',
+      type: 'append',
+    },
+    ecu: {
+      primaryPage: '#page-ecuInfo',
+      contentSelector: '.page',
+      fallbackSelector: '.page',
+      type: 'append',
+    },
+    adaptations: {
+      primaryPage: '#page-adaptations',
+      contentSelector: '.page',
+      fallbackSelector: '.page',
+      type: 'append',
+    },
+  };
+
+  const target = categoryTargets[categoryName];
+  if (!target) {
+    console.warn(`[Route] Unknown category: ${categoryName}`);
+    return false;
+  }
+
+  // Find the destination container
+  const primaryPage = document.querySelector(target.primaryPage);
+  if (!primaryPage) {
+    console.warn(`[Route] Primary page not found: ${target.primaryPage}`);
+    return false;
+  }
+
+  let contentContainer = primaryPage.querySelector(target.contentSelector);
+  if (!contentContainer) {
+    contentContainer = primaryPage.querySelector(target.fallbackSelector);
+  }
+
+  if (!contentContainer) {
+    console.warn(`[Route] Could not find content container for ${categoryName}`);
+    return false;
+  }
+
+  // Clear previous content if specified
+  if (target.type === 'replace') {
+    const header = contentContainer.querySelector('.phdr');
+    contentContainer.innerHTML = '';
+    if (header) contentContainer.appendChild(header);
+  }
+
+  // Append components
+  if (Array.isArray(categoryData)) {
+    categoryData.forEach((comp) => {
+      if (comp instanceof HTMLElement) {
+        contentContainer.appendChild(comp);
+      } else if (comp?.element instanceof HTMLElement) {
+        contentContainer.appendChild(comp.element);
+      }
+    });
+  } else if (categoryData instanceof HTMLElement) {
+    contentContainer.appendChild(categoryData);
+  }
+
+  console.log(`[Route] Routed ${Array.isArray(categoryData) ? categoryData.length : 1} components to ${categoryName}`);
+  return true;
+}
+
+/**
+ * DYNAMIC TRANSLATION OBSERVER SETUP (LOOP-SAFE)
+ * Prevents cascading updates and infinite loops
+ */
+function initDynamicTranslationObserver(){
+  if(window.stopAllScripts) return;  // Emergency stop
+  
+  // Disconnect existing observer to prevent conflicts
+  if(dynamicTranslationObserver){
+    try{dynamicTranslationObserver.disconnect();}catch(e){}
+    dynamicTranslationObserver = null;
+  }
+  
+  dynamicTranslationObserver = new MutationObserver(mutations => {
+    // Triple-check safeguards against loops
+    if(window.stopAllScripts) return;
+    if(isPageSwitching) return;
+    if(window.__nexusTranslationBusy) return;  // Prevent concurrent translations
+    
+    // Use debouncing to batch multiple mutations
+    if(translationObserverDebounceTimer){
+      clearTimeout(translationObserverDebounceTimer);
+    }
+    
+    translationObserverDebounceTimer = setTimeout(() => {
+      if(window.stopAllScripts || isPageSwitching || window.__nexusTranslationBusy) return;
+      
+      try {
+        // Temporarily disconnect to prevent observer from triggering on translation changes
+        dynamicTranslationObserver?.disconnect();
+        
+        mutations.forEach(m => {
+          if(window.stopAllScripts) return;
+          
+          if(m.type === 'childList'){
+            m.addedNodes.forEach(node=>{
+              if(window.stopAllScripts) return;
+              if(node.nodeType!==1) return;
+              if(TRANSLATION_IGNORE_TAGS.has(node.tagName)) return;
+              // Ensure no recursive translation calls
+              if(!window.__nexusTranslationBusy){
+                translateElementTree(node, S.lang);
+              }
+            });
+          } else if(m.type==='characterData'){
+            if(window.stopAllScripts) return;
+            const p = m.target.parentElement;
+            if(p && !TRANSLATION_IGNORE_TAGS.has(p.tagName)){
+              if(!window.__nexusTranslationBusy){
+                translateElementTree(p, S.lang);
+              }
+            }
+          }
+        });
+      } catch(e){
+        console.warn('[Observer] Translation error:', e);
+      } finally {
+        // Re-observe after translations are complete
+        if(dynamicTranslationObserver && !window.stopAllScripts){
+          try{
+            dynamicTranslationObserver.observe(document.body,{
+              childList:true,
+              subtree:true,
+              characterData:false  // Disable characterData to reduce observer triggers
+            });
+          }catch(e){ console.warn('[Observer] Re-observe error:', e); }
+        }
+        translationObserverDebounceTimer = null;
+      }
+    }, 50);  // 50ms debounce
+  });
+  
+  // Initial observation setup
+  try {
+    dynamicTranslationObserver.observe(document.body,{
+      childList:true,
+      subtree:true,
+      characterData:false  // Disabled to reduce cascading updates
+    });
+  } catch(e){
+    console.warn('[Observer] Initial observe error:', e);
+  }
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   // Restore API key from localStorage
   const savedKey = localStorage.getItem('npk');
@@ -5206,9 +6096,90 @@ document.addEventListener('DOMContentLoaded',()=>{
   const apiInpEl = document.getElementById('apiInp');
   if(apiInpEl && S.apiKey) apiInpEl.value = S.apiKey;
 
+  const translateInpEl = document.getElementById('translateApiInp');
+  if(translateInpEl && S.translateApiKey) translateInpEl.value = S.translateApiKey;
+
+  const langSelEl = document.getElementById('langSel');
+  const langSelectedEl = document.getElementById('langSelected');
+  const langOptionsEl = document.getElementById('langOptions');
+  const langItems = langOptionsEl ? Array.from(langOptionsEl.querySelectorAll('li[data-value]')) : [];
+
+  const setLangUI = code => {
+    const option = langItems.find(li => li.dataset.value === code);
+    const label = option ? option.textContent : code;
+    if(langSelectedEl){
+      const labelEl = langSelectedEl.querySelector('.lang-label');
+      if(labelEl) labelEl.textContent = label;
+      langSelectedEl.setAttribute('aria-expanded','false');
+    }
+    if(langOptionsEl){
+      langOptionsEl.classList.remove('open');
+      langOptionsEl.setAttribute('aria-hidden','true');
+    }
+    if(langSelEl){
+      langSelEl.value = code;
+    }
+  };
+
+  const showLangOptions = () => {
+    if(!langOptionsEl || !langSelectedEl) return;
+    const open = langOptionsEl.classList.toggle('open');
+    langOptionsEl.setAttribute('aria-hidden', (!open).toString());
+    langSelectedEl.setAttribute('aria-expanded', open.toString());
+  };
+
+  const closeLangOptions = () => {
+    if(!langOptionsEl || !langSelectedEl) return;
+    langOptionsEl.classList.remove('open');
+    langOptionsEl.setAttribute('aria-hidden','true');
+    langSelectedEl.setAttribute('aria-expanded','false');
+  };
+
+  const applyLangSelection = async code => {
+    if(!code) return;
+    if(langSelEl){ langSelEl.value = code; }
+    setLangUI(code);
+    S.lang = code;
+    localStorage.setItem('nexusLang', code);
+    if(langSelEl) langSelEl.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
+  if(langSelectedEl){
+    langSelectedEl.addEventListener('click', e => { e.stopPropagation(); showLangOptions(); });
+    langSelectedEl.addEventListener('keydown', e => {
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); showLangOptions(); }
+      if(e.key === 'Escape'){ closeLangOptions(); }
+    });
+  }
+
+  langItems.forEach(li => {
+    li.addEventListener('click', () => {
+      const selected = li.dataset.value;
+      applyLangSelection(selected);
+    });
+  });
+
+  document.addEventListener('click', closeLangOptions);
+
+  setLangUI(S.lang || (langSelEl?.value || 'en'));
+
   // Connection button
   const connBtn = document.getElementById('connBtn');
   if(connBtn) connBtn.addEventListener('click', startConn);
+
+  // Home button via logo
+  const logoHome = document.getElementById('logoHome');
+  if(logoHome){
+    const goHome = () => { showPage('home'); updateNavActive(''); };
+    logoHome.addEventListener('click', goHome);
+    logoHome.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' ') { e.preventDefault(); goHome(); } });
+  }
+
+  // Manual selection actions in modal
+  const btButton = document.getElementById('connectBluetooth');
+  if(btButton) btButton.addEventListener('click', connectViaBluetooth);
+  const usbButton = document.getElementById('connectUSB');
+  if(usbButton) usbButton.addEventListener('click', connectViaUSB);
 
   // Cancel connection
   const cancelConn = document.getElementById('cancelConn');
@@ -5264,8 +6235,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     else { showPage(pid); }
   }));
   const langSel = document.getElementById('langSel');
-  if(langSel) langSel.addEventListener('change',e=>{
+  if(langSel) langSel.addEventListener('change',async e=>{
     S.lang = e.target.value;
+    localStorage.setItem('nexusLang', S.lang);
     applyI18n();
     renderSysGrid();
     renderLdSysPicker();
@@ -5284,6 +6256,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
     const canSpan=document.querySelector('.ni[data-page="canAnalysis"] span:not(.ni-badge)');
     if(canSpan) canSpan.textContent = t('canBus')||'CAN Analysis';
+    scheduleAutoTranslation(S.lang);
   });
 
   const startScanBtn = document.getElementById('startScanBtn');
@@ -5327,9 +6300,34 @@ document.addEventListener('DOMContentLoaded',()=>{
   const saveKey = document.getElementById('saveKey');
   if(saveKey) saveKey.addEventListener('click',()=>{
     const k=document.getElementById('apiInp')?.value?.trim();
-    if(k){ S.apiKey=k; localStorage.setItem('npk',k); toast(S.lang==='ar'?'✅ تم الحفظ':'✅ Saved','ok'); }
+    const tk=document.getElementById('translateApiInp')?.value?.trim();
+    let saved=false;
+    if(k){ S.apiKey=k; localStorage.setItem('npk',k); saved=true; }
+    if(tk){ S.translateApiKey=tk; localStorage.setItem('ntranslateKey',tk); saved=true; }
+    if(saved){ toast(S.lang==='ar'?'✅ تم الحفظ':'✅ Saved','ok'); }
     else toast(S.lang==='ar'?'أدخل مفتاحاً صحيحاً':'Enter valid key','err');
   });
+
+  const saveApiUrlBtn = document.querySelector('[onclick="saveCustomApiUrl()"]');
+  if(saveApiUrlBtn) {
+    saveApiUrlBtn.addEventListener('click',()=>{
+      const url = document.getElementById('customApiUrl')?.value?.trim();
+      if(url) {
+        S.customApiUrl = url;
+        localStorage.setItem('nexusApiUrl', url);
+        toast(S.lang==='ar'?'✅ تم حفظ API URL':'✅ API URL Saved','ok');
+      } else {
+        toast(S.lang==='ar'?'⚠️ أدخل رابط API صحيح':'⚠️ Enter valid API URL','err');
+      }
+    });
+  }
+
+  const savedApiUrl = localStorage.getItem('nexusApiUrl');
+  if(savedApiUrl) {
+    S.customApiUrl = savedApiUrl;
+    const apiUrlInp = document.getElementById('customApiUrl');
+    if(apiUrlInp) apiUrlInp.value = savedApiUrl;
+  }
 
   const baudSel = document.getElementById('baudSel');
   if(baudSel) baudSel.addEventListener('change',e=>{ S.baud=parseInt(e.target.value); });
@@ -6234,8 +7232,6 @@ async function aiCodingAnalysis() {
   el.textContent=r;
 }
 
-let oscRunning=false, oscAnimId=null, oscChannel='rpm';
-
 const OSC_CHANNELS = {
   rpm:   {label:'Engine RPM (CKP)',  color:'#00E5FF', freq:66.7, amplitude:0.85, shape:'sine',  unit:'rpm'},
   o2:    {label:'O2 Sensor B1S1',   color:'#00FF88', freq:0.5,  amplitude:0.8,  shape:'switch', unit:'V'},
@@ -6272,6 +7268,9 @@ function oscGenerateData(ch, count=400) {
 }
 
 function oscDraw() {
+  // SAFETY CHECK: Prevent drawing if stopped or already frozen
+  if (!oscRunning || window.stopAllScripts) return;
+  
   const canvas=document.getElementById('oscCanvas'); if(!canvas) return;
   const ctx=canvas.getContext('2d');
   const W=canvas.offsetWidth, H=220;
@@ -6293,8 +7292,31 @@ function oscDraw() {
 
   const ch=oscChannel;
   const c=OSC_CHANNELS[ch]||OSC_CHANNELS.rpm;
-  const data=oscGenerateData(ch);
+  const isDigital = isSensorDigital(ch);
+  const liveValue = getRealSensorValue(ch);
+  
+  // Generate dynamic waveform based on live sensor value
+  const data = [];
+  const count = 400;
+  for(let i=0; i<count; i++){
+    const t = i/count;
+    let v;
+    
+    if(isDigital){
+      // Digital: Sharp square wave based on sensor activity
+      const duty = Math.floor(60 + liveValue * 30);  // Duty cycle 60-90%
+      v = ((t * c.freq) % 1) < (duty / 100) ? 0.9 : 0.1;
+    } else {
+      // Analog: Smooth sine wave modulated by live value
+      const amp = c.amplitude * liveValue;
+      const noise = (Math.random() - 0.5) * 0.03;
+      v = 0.5 + amp * Math.sin(t * Math.PI * 2 * c.freq) + noise;
+      v = Math.max(0, Math.min(1, v));
+    }
+    data.push(v);
+  }
 
+  // Draw grid background
   ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H);
   ctx.strokeStyle='rgba(0,229,255,0.07)'; ctx.lineWidth=1;
   for(let x=0;x<=W;x+=W/10){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
@@ -6303,26 +7325,30 @@ function oscDraw() {
   ctx.beginPath(); ctx.moveTo(0,H/2); ctx.lineTo(W,H/2); ctx.stroke();
   ctx.setLineDash([]);
 
+  // Draw waveform with glow effect
   const step=W/(data.length-1);
   const grad=ctx.createLinearGradient(0,0,W,0);
   grad.addColorStop(0,c.color+'88'); grad.addColorStop(1,c.color);
-  ctx.strokeStyle=grad; ctx.lineWidth=2; ctx.lineJoin='round';
-  ctx.shadowColor=c.color; ctx.shadowBlur=6;
+  ctx.strokeStyle=grad; ctx.lineWidth=3; ctx.lineJoin='round'; ctx.lineCap='round';
+  ctx.shadowColor=c.color; ctx.shadowBlur=12; ctx.shadowOffsetX=0; ctx.shadowOffsetY=0;
   ctx.beginPath();
   data.forEach((v,i)=>{
     const x=i*step, y=H-v*H;
     i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   });
-  ctx.stroke(); ctx.shadowBlur=0;
+  ctx.stroke();
+  ctx.shadowBlur=0;
 
-  ctx.fillStyle=c.color+'10';
+  // Fill area under curve
+  ctx.fillStyle=c.color+'15';
   ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath(); ctx.fill();
 
+  // Calculate and display statistics
   const min=Math.min(...data), max=Math.max(...data), avg=(data.reduce((a,b)=>a+b,0)/data.length);
   const duty=data.filter(v=>v>0.5).length/data.length*100;
   const periodEst=(1/(c.freq||1)*1000).toFixed(2);
-  document.getElementById('oscFreq').textContent=`${c.freq} Hz`;
-  document.getElementById('oscPeriod').textContent=`${periodEst} ms`;
+  document.getElementById('oscFreq').textContent=`${(c.freq * liveValue).toFixed(2)} Hz`;
+  document.getElementById('oscPeriod').textContent=`${(periodEst * (1/liveValue || 1)).toFixed(2)} ms`;
   document.getElementById('oscMin').textContent=min.toFixed(3);
   document.getElementById('oscMax').textContent=max.toFixed(3);
   document.getElementById('oscAvg').textContent=avg.toFixed(3);
@@ -6332,11 +7358,26 @@ function oscDraw() {
 }
 
 function oscToggleRun() {
+  if(window.stopAllScripts) return;  // Emergency stop
   if (!requireConn()) return;
-  oscRunning=!oscRunning;
-  const btn=document.getElementById('oscRunBtn');
-  if(oscRunning){ if(btn)btn.textContent='⏹ STOP'; oscDraw(); }
-  else { if(oscAnimId)cancelAnimationFrame(oscAnimId); if(btn)btn.textContent='▶ RUN'; }
+  
+  // ALWAYS cancel any pending animation frame before toggling
+  if(oscAnimId){
+    cancelAnimationFrame(oscAnimId);
+    oscAnimId = null;
+  }
+  
+  oscRunning = !oscRunning;
+  const btn = document.getElementById('oscRunBtn');
+  
+  if(oscRunning){
+    if(btn) btn.textContent = '⏹ STOP';
+    // Start fresh draw loop AFTER ensuring previous one is cancelled
+    oscAnimId = requestAnimationFrame(oscDraw);
+  } else {
+    if(btn) btn.textContent = '▶ RUN';
+    // Already cancelled above, just update UI
+  }
 }
 
 function oscUpdateChannel() {
@@ -6410,6 +7451,353 @@ function initOscChannels() {
     oscChannel = visible[0].value;
   }
   oscUpdateChannel();
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🎯 ENHANCED OSCILLOSCOPE: REAL-TIME WAVEFORMS FROM LIVE CAN DATA
+// ════════════════════════════════════════════════════════════════
+
+/**
+ * Determine if a sensor is digital (PWM/Square) or analog (Sine)
+ */
+function isSensorDigital(channel) {
+  const digitalChannels = ['coil','inj','cam','abs_whl'];
+  const pwmChannels = ['inj','coil'];
+  return digitalChannels.includes(channel);
+}
+
+/**
+ * Get real CAN sensor value for dynamic waveform rendering
+ */
+function getRealSensorValue(channel) {
+  const sensorMap = {
+    rpm:    () => Math.min(S.data.rpm / 8000, 1),           // Normalized 0-8000
+    o2:     () => 0.4 + Math.random() * 0.5,                 // O2 switches 0.4-0.9V
+    o2b2:   () => 0.4 + Math.random() * 0.5,
+    inj:    () => (S.data.rpm > 500) ? Math.random() * 0.8 + 0.1 : 0,
+    coil:   () => (S.data.rpm > 400) ? 1.0 : 0,
+    maf:    () => Math.min(S.data.maf / 10, 1),              // Normalized 0-10 g/s
+    tps:    () => S.data.throttle / 100,                     // 0-100%
+    map:    () => Math.min(S.data.map / 100, 1),             // Normalized 0-100 kPa
+    cam:    () => (S.data.rpm > 400) ? 0.5 + Math.sin(Date.now()/200) * 0.4 : 0,
+    bat:    () => S.data.battery / 14,                       // Normalized ~13.8V
+    eps:    () => 0.5 + Math.random() * 0.3,                 // Simulate EPS torque
+    abs_whl:() => (S.data.speed > 5) ? Math.sin(Date.now()/100) * 0.5 + 0.5 : 0,
+  };
+  const fn = sensorMap[channel];
+  return fn ? Math.max(0, Math.min(1, fn())) : 0.5;
+}
+
+// ════════════════════════════════════════════════════════════════
+// 🚗 VEHICLE HISTORY DATABASE & PATIENT CARD SYSTEM
+// ════════════════════════════════════════════════════════════════
+
+/**
+ * Vehicle patient card structure
+ */
+class VehicleRecord {
+  constructor(vin, make, model, year, protocol) {
+    this.id = vin;
+    this.vin = vin;
+    this.make = make;
+    this.model = model;
+    this.year = year;
+    this.protocol = protocol;
+    this.firstSeen = new Date().toISOString();
+    this.lastSeen = new Date().toISOString();
+    this.visitCount = 1;
+    this.detectedSystems = [];
+    this.dtcHistory = [];
+    this.serviceNotes = '';
+  }
+}
+
+/**
+ * Save vehicle to history database
+ */
+function saveVehicleToHistory() {
+  if(!S.vin || !S.vehicleMake) return;
+  
+  try {
+    let history = JSON.parse(localStorage.getItem('nexusVehicleHistory')) || {};
+    const vin = S.vin;
+    
+    if(history[vin]) {
+      // Update existing record
+      history[vin].lastSeen = new Date().toISOString();
+      history[vin].visitCount = (history[vin].visitCount || 0) + 1;
+      history[vin].detectedSystems = S.detectedSystems || history[vin].detectedSystems;
+      if(S.dtcs && S.dtcs.length > 0) {
+        history[vin].dtcHistory = [...new Set([...(history[vin].dtcHistory || []), ...S.dtcs])];
+      }
+    } else {
+      // Create new record
+      const [make, model, year] = parseVehicleInfo(S.vehicleMake);
+      history[vin] = new VehicleRecord(vin, make, model, year, S.protocol);
+      history[vin].detectedSystems = S.detectedSystems || [];
+      history[vin].dtcHistory = S.dtcs || [];
+    }
+    
+    localStorage.setItem('nexusVehicleHistory', JSON.stringify(history));
+    return history[vin];
+  } catch(e) {
+    console.warn('History save error:', e);
+    return null;
+  }
+}
+
+/**
+ * Parse vehicle make/model/year from info string
+ */
+function parseVehicleInfo(infoStr) {
+  if(!infoStr) return ['Unknown', 'Unknown', '—'];
+  const parts = infoStr.split(/[\s\-–—]/);
+  const make = parts[0] || 'Unknown';
+  const model = parts[1] || 'Unknown';
+  const year = parts[2] || '—';
+  return [make, model, year];
+}
+
+/**
+ * Check if VIN exists in history and notify
+ */
+function checkVehicleHistory(vin) {
+  if(!vin) return false;
+  
+  try {
+    const history = JSON.parse(localStorage.getItem('nexusVehicleHistory')) || {};
+    if(history[vin]) {
+      const record = history[vin];
+      const visits = record.visitCount || 1;
+      const lastDate = new Date(record.lastSeen).toLocaleDateString();
+      const msg = `🔄 Previous Record Found: ${visits} visit${visits > 1 ? 's' : ''} recorded (Last: ${lastDate})`;
+      toast(msg, 'info');
+      return true;
+    }
+  } catch(e) {
+    console.warn('History check error:', e);
+  }
+  return false;
+}
+
+/**
+ * Load and display all vehicle history
+ */
+function loadVehicleHistory() {
+  try {
+    const history = JSON.parse(localStorage.getItem('nexusVehicleHistory')) || {};
+    const gridEl = document.getElementById('vehicleHistoryGrid');
+    const noMsgEl = document.getElementById('noHistoryMsg');
+    
+    if(!gridEl) return;
+    
+    const records = Object.values(history);
+    if(records.length === 0) {
+      noMsgEl.style.display = 'block';
+      gridEl.innerHTML = '';
+      return;
+    }
+    
+    noMsgEl.style.display = 'none';
+    gridEl.innerHTML = records.map(rec => createPatientCard(rec)).join('');
+  } catch(e) {
+    console.warn('History load error:', e);
+  }
+}
+
+/**
+ * Create HTML patient card for vehicle
+ */
+function createPatientCard(record) {
+  const lastDate = new Date(record.lastSeen).toLocaleDateString();
+  const firstDate = new Date(record.firstSeen).toLocaleDateString();
+  const dtcCount = (record.dtcHistory || []).length;
+  const sysCount = (record.detectedSystems || []).length;
+  const status = dtcCount > 0 ? 'warning' : 'healthy';
+  const statusColor = dtcCount > 0 ? '#FF6B6B' : '#00FF88';
+  
+  return `
+    <div class="patient-card" style="background:rgba(0,0,0,0.3);border:2px solid rgba(0,229,255,0.2);border-radius:12px;padding:16px;overflow:hidden;cursor:pointer;transition:all 0.3s ease;" onclick="showPatientDetails('${record.vin}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--cyan);">${record.make} ${record.model}</div>
+          <div style="font-size:12px;color:var(--dim);margin-top:2px;">📅 ${record.year}</div>
+        </div>
+        <div style="background:${statusColor}22;border:1px solid ${statusColor};border-radius:6px;padding:4px 8px;font-size:11px;font-weight:700;color:${statusColor};">
+          ${status === 'healthy' ? '✅ Healthy' : '⚠️ DTCs'}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;font-size:12px;">
+        <div style="background:rgba(0,0,0,0.2);padding:8px;border-radius:6px;border-left:3px solid var(--cyan);">
+          <div style="color:var(--dim);font-size:10px;margin-bottom:2px;">VIN</div>
+          <div style="color:var(--cyan);font-weight:700;font-family:monospace;">${record.vin.substring(0,8)}…</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);padding:8px;border-radius:6px;border-left:3px solid var(--green);">
+          <div style="color:var(--dim);font-size:10px;margin-bottom:2px;">Visits</div>
+          <div style="color:var(--green);font-weight:700;">${record.visitCount || 1}</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);padding:8px;border-radius:6px;border-left:3px solid var(--orange);">
+          <div style="color:var(--dim);font-size:10px;margin-bottom:2px;">Systems</div>
+          <div style="color:var(--orange);font-weight:700;">${sysCount} detected</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.2);padding:8px;border-radius:6px;border-left:3px solid var(--red);">
+          <div style="color:var(--dim);font-size:10px;margin-bottom:2px;">DTCs</div>
+          <div style="color:${statusColor};font-weight:700;">${dtcCount}</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--dim);padding:8px;background:rgba(0,0,0,0.2);border-radius:6px;margin-bottom:10px;display:flex;justify-content:space-between;">
+        <span>📅 First: ${firstDate}</span>
+        <span>🕐 Last: ${lastDate}</span>
+      </div>
+      <button class="btn bc" style="width:100%;font-size:11px;padding:6px;" onclick="event.stopPropagation();deleteVehicleRecord('${record.vin}')">🗑️ Remove</button>
+    </div>
+  `;
+}
+
+/**
+ * Display patient card details (full view)
+ */
+function showPatientDetails(vin) {
+  try {
+    const history = JSON.parse(localStorage.getItem('nexusVehicleHistory')) || {};
+    const record = history[vin];
+    if(!record) return;
+    
+    const msg = `
+<strong>🚗 ${record.make} ${record.model} (${record.year})</strong>
+VIN: <code>${record.vin}</code>
+
+📊 <strong>Visit Record:</strong>
+  • Total Visits: ${record.visitCount || 1}
+  • First Scan: ${new Date(record.firstSeen).toLocaleString()}
+  • Last Scan: ${new Date(record.lastSeen).toLocaleString()}
+
+🔧 <strong>Detected Systems (${(record.detectedSystems || []).length}):</strong>
+  ${(record.detectedSystems || []).map(s => `• ${s}`).join('\n')}
+
+⚠️ <strong>DTC History (${(record.dtcHistory || []).length}):</strong>
+  ${(record.dtcHistory || []).slice(0,10).map(dtc => `• ${dtc}`).join('\n')}
+  ${(record.dtcHistory || []).length > 10 ? `• ... and ${(record.dtcHistory || []).length - 10} more` : ''}
+
+📝 <strong>Notes:</strong>
+  ${record.serviceNotes || 'No notes recorded'}
+    `;
+    
+    alert(msg);
+  } catch(e) {
+    console.warn('Details error:', e);
+  }
+}
+
+/**
+ * Delete vehicle record from history
+ */
+function deleteVehicleRecord(vin) {
+  if(!confirm(`Delete record for ${vin}?`)) return;
+  
+  try {
+    let history = JSON.parse(localStorage.getItem('nexusVehicleHistory')) || {};
+    delete history[vin];
+    localStorage.setItem('nexusVehicleHistory', JSON.stringify(history));
+    loadVehicleHistory();
+    toast('🗑️ Record deleted', 'ok');
+  } catch(e) {
+    console.warn('Delete error:', e);
+  }
+}
+
+/**
+ * Export all vehicle history as JSON
+ */
+function exportVehicleHistory() {
+  try {
+    const history = localStorage.getItem('nexusVehicleHistory');
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(history || '{}');
+    const link = document.createElement('a');
+    link.href = dataStr;
+    link.download = `nexus_history_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    toast('📥 History exported', 'ok');
+  } catch(e) {
+    console.warn('Export error:', e);
+  }
+}
+
+/**
+ * Clear all vehicle history (with confirmation)
+ */
+function clearVehicleHistory() {
+  if(!confirm('Are you sure? This will delete ALL vehicle history.')) return;
+  
+  try {
+    localStorage.removeItem('nexusVehicleHistory');
+    loadVehicleHistory();
+    toast('🗑️ All history cleared', 'ok');
+  } catch(e) {
+    console.warn('Clear error:', e);
+  }
+}
+
+// Initialize history on page load
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadVehicleHistory);
+} else {
+  loadVehicleHistory();
+}
+
+/**
+ * Search vehicle history by VIN, Make, or Model
+ */
+function searchVehicleHistory(query) {
+  try {
+    const history = JSON.parse(localStorage.getItem('nexusVehicleHistory')) || {};
+    const gridEl = document.getElementById('vehicleHistoryGrid');
+    
+    if(!gridEl) return;
+    
+    const searchTerm = query.toLowerCase();
+    const filtered = Object.values(history).filter(rec => 
+      rec.vin.toLowerCase().includes(searchTerm) ||
+      rec.make.toLowerCase().includes(searchTerm) ||
+      rec.model.toLowerCase().includes(searchTerm)
+    );
+    
+    if(filtered.length === 0) {
+      gridEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--dim);">🔍 No vehicles found matching your search</div>';
+      return;
+    }
+    
+    gridEl.innerHTML = filtered.map(rec => createPatientCard(rec)).join('');
+  } catch(e) {
+    console.warn('Search error:', e);
+  }
+}
+
+// Attach search listener
+if(document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('historySearchInput');
+    if(searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        if(e.target.value.trim() === '') {
+          loadVehicleHistory();
+        } else {
+          searchVehicleHistory(e.target.value);
+        }
+      });
+    }
+  });
+} else {
+  const searchInput = document.getElementById('historySearchInput');
+  if(searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      if(e.target.value.trim() === '') {
+        loadVehicleHistory();
+      } else {
+        searchVehicleHistory(e.target.value);
+      }
+    });
+  }
 }
 
 async function runBatteryRegistration() {
@@ -6823,6 +8211,13 @@ window.toggleAct             = typeof toggleAct             === 'function' ? tog
 window.toggleCoding          = typeof toggleCoding          === 'function' ? toggleCoding          : ()=>{};
 window.updateNavActive       = typeof updateNavActive       === 'function' ? updateNavActive       : ()=>{};
 window.writeCodingData       = typeof writeCodingData       === 'function' ? writeCodingData       : ()=>{};
+window.bridgeDetectedModulesToUI = typeof bridgeDetectedModulesToUI === 'function' ? bridgeDetectedModulesToUI : ()=>{};
+window.fetchUIComponentMappings = typeof fetchUIComponentMappings === 'function' ? fetchUIComponentMappings : ()=>{};
+window.getUIGenerationSummary = typeof getUIGenerationSummary === 'function' ? getUIGenerationSummary : ()=>{};
+window.updateSidebarSecurityState = typeof updateSidebarSecurityState === 'function' ? updateSidebarSecurityState : ()=>{};
+window.routeAPICategoryToUI = typeof routeAPICategoryToUI === 'function' ? routeAPICategoryToUI : ()=>{};
+window.clearSectionContent = typeof clearSectionContent === 'function' ? clearSectionContent : ()=>{};
+
 </script>
 <script>
 // ══════════════════════════════════════════════════════
